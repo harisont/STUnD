@@ -1,0 +1,25 @@
+name: STUnD
+version: 0
+synopsis: A GUI Search Tool for (bilingual) parallel UD treebanks 
+description:  A prototype GUI Search Tool for (bilingual) parallel Universal Dependencies treebanks that runs in your browser
+license: BSD2
+license-file: LICENSE
+author: Arianna Masciolini
+maintainer: arianna.masciolini@gu.se
+category: Language
+build-type: Simple
+extra-source-files: README.md
+cabal-version: >= 1.10 
+
+executable stund-gui
+    main-is: Main.hs
+    build-depends:
+        base,
+        MissingH,
+        directory,
+        bytestring,
+        text,
+        threepenny-gui,
+        gf-ud,
+        l2-ud
+    default-language: Haskell2010

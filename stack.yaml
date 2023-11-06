@@ -1,0 +1,22 @@
+resolver: lts-18.28
+
+packages: 
+- .
+
+extra-deps:
+# - multiset-0.3.4.3
+# - MissingH-1.6.0.1
+- github: GrammaticalFramework/gf-core
+  commit: 810640822dc3047af8fd9d7988e3f2423595c7b2
+- github: GrammaticalFramework/gf-ud
+  commit: 1a4a8c1ac08c02895fa886ca20e5e7a706f484e2
+- github: harisont/concept-alignment
+  commit: 5d7718ecdad05001b68b68ec42094d399fdef508 # l2-ud branch
+- github: harisont/L2-UD
+  commit: 51415c8784d81b263bd809fb4efac526dc0b2b1c
+- github: harisont/hs-md
+  commit: 62e5e955709c332bcc8043678a116fbb38ab455b
+
+flags:
+  gf:
+    server: false
