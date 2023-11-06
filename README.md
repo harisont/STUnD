@@ -3,16 +3,33 @@ A prototype GUI Search Tool for (bilingual) parallel Universal Dependencies tree
 
 ---
 
-## Installation
+## Installing STUnD
 1. download the binary:
-   - [Linux and hopefully MacOS](TODO:) (only tested on Manjaro)
-   - [Windows](TODO:) (only tested on Windows 10)
+   - [Linux and hopefully MacOS](https://github.com/harisont/STUnD/releases/download/v0/stund-gui) (only tested on Manjaro)
+   - [Windows](https://github.com/harisont/STUnD/releases/download/v0/stund-gui.exe) (only tested on Windows 10)
 2. create a shortcut to start the GUI in one click:
    - on Linux, copy [the desktop file](stund.desktop) wherever you have your desktop files (`~/.local/share/applications/` maybe?)
    - on MacOS, I have no idea
    - on Windows, create a Desktop shortcut to [stund.ps1](stund.ps1), right click on it and make it executable on click by setting `Properties > Target` to `powershell.exe -ExecutionPolicy Bypass -File "WHATEVER-PATH-WAS-ALREADY-THERE"` (mind the quotes!)
 
-## Usage
+As an alternative, you can also try...
+
+## Compiling from source
+By far the simplest way to compile STUnD is with [the Haskell Tool Stack](https://docs.haskellstack.org/en/stable/). If you do have Stack, running  
+
+```
+stack build
+```
+
+or
+
+```
+stack install
+```
+
+which also installs the executable, should be all that is needed enough. On Windows, however, you might encounter problems related to curl, STUnD's only external dependency. If that's the case, see [this](win.md).
+
+## Using STUnD
 When you launch STUnD, a new tab will be opened in your browser.
 You should see something like this:
 
