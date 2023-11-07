@@ -42,7 +42,7 @@ setup window = do
   uri1 <- loadFile "text/plain" path1
   uri2 <- loadFile "text/plain" path2
 
-  return window # set UI.title "L2-UD"
+  return window # set UI.title "STUnD"
   
   globalStyle <- mkElement "style"
   element globalStyle # 
