@@ -2,7 +2,7 @@ name: STUnD
 version: 0
 synopsis: A GUI Search Tool for (bilingual) parallel UD treebanks 
 description:  A prototype GUI Search Tool for (bilingual) parallel Universal Dependencies treebanks that runs in your browser
-license: BSD2
+license: MIT
 license-file: LICENSE
 author: Arianna Masciolini
 maintainer: arianna.masciolini@gu.se
