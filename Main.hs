@@ -14,17 +14,19 @@ import Text.Read (readMaybe)
 import Data.Maybe
 import Data.List.Utils
 import System.Directory
+import Text.PrettyPrint (render)
 import Graphics.UI.Threepenny.Core
 import qualified Graphics.UI.Threepenny as UI
 import UDConcepts
 import UDPatterns
+import VisualizeUD
 import Utils.UDConcepts
 import Utils.Output
 import Align
 import Match hiding (matchesUDPattern)
 import Errors
 
-data Mode = Text | CoNNLU deriving (Eq, Show)
+data Mode = TextMode | CoNNLUMode | TreeMode deriving (Eq, Show)
 
 main :: IO ()
 main = do
@@ -71,8 +73,8 @@ setup window = do
 
   treebankDlSpan <- UI.span
   element treebankDlSpan # set html (unlines [
-      "<a href=\"" ++ uri1 ++ "\" download>save L1</a>"
-    , "<a href=\"" ++ uri2 ++ "\" download>save L2</a>"])
+      "<a href=\"" ++ uri1 ++ "\" download>save L1 as CoNNL-U</a>"
+    , "<a href=\"" ++ uri2 ++ "\" download>save L2 as CoNNL-U</a>"])
   element treebankDlSpan # set UI.style [("margin","1%")]
   element treebankDlSpan # set UI.class_ "unselectable"
   hide treebankDlSpan
@@ -93,6 +95,7 @@ setup window = do
   
   textMode <- buildMode "text" True
   conlluMode <- buildMode "CoNNL-U" False
+  treeMode <- buildMode "tree" False
 
   nHitsSpan <- string "0 hits"
   element nHitsSpan # set UI.class_ "unselectable"
@@ -107,6 +110,7 @@ setup window = do
               , element modeSpan
               , element textMode
               , element conlluMode
+              , element treeMode
               , element searchButton
               , element nHitsSpan
               , element treebankDlSpan
@@ -117,13 +121,25 @@ setup window = do
     hide treebankDlSpan
     hide tsvDlSpan
     hide nHitsSpan
+
     l1Path <- get value l1Input 
     l2Path <- get value l2Input
+    
     queryTxt <- get value queryInput
     replacementTxt <- get value replacementInput
+    
     textModeButton <- getElementById window "text"
+    conlluModeButton <- getElementById window "CoNNL-U"
+    treeModeButton <- getElementById window "tree"
+
     textModeValue <- get UI.checked (fromJust $ textModeButton)
-    let mode = if textModeValue then Text else CoNNLU
+    conlluModeValue <- get UI.checked (fromJust $ conlluModeButton)
+    treeModeValue <- get UI.checked (fromJust $ treeModeButton)
+
+    let mode = case (textModeValue, conlluModeValue, treeModeValue) of
+                (True,_,_) -> TextMode 
+                (_,True,_) -> CoNNLUMode
+                (_,_,True) -> TreeMode
 
     l1Exists <- liftIO $ doesFileExist l1Path
     l2Exists <- liftIO $ doesFileExist l2Path
@@ -176,12 +192,14 @@ setup window = do
                             then udTree2sentence m1 
                             else udTree2sentence (adjustRootAndPositions m1)
                         m2' = udTree2sentence (adjustRootAndPositions m2)
-                    in ((if mode == Text 
-                        then highlin s1 (udTree2sentence m1) HTML
-                        else (prt m1') ++ "\n", 
-                      if mode == Text 
-                        then highlin s2 (udTree2sentence m2) HTML
-                        else (prt m2') ++ "\n")
+                    in ((case mode of
+                            TextMode -> highlin s1 (udTree2sentence m1) HTML
+                            CoNNLUMode -> (prt m1') ++ "\n"
+                            TreeMode -> render $ conll2svg $ prt m1',
+                         case mode of
+                            TextMode -> highlin s2 (udTree2sentence m2) HTML
+                            CoNNLUMode -> (prt m2') ++ "\n"
+                            TreeMode -> render $ conll2svg $ prt m2')
                     )) 
                   ms) 
               matches'
@@ -192,7 +210,8 @@ setup window = do
           ((map rmBold l1Col) `zip` (map rmBold l2Col)))
         liftIO $ writeFile path1 (encodeUtf8 $ pack $ unlines l1Col)
         liftIO $ writeFile path2 (encodeUtf8 $ pack $ unlines l2Col)
-        if mode == Text then unhide tsvDlSpan else unhide treebankDlSpan
+        -- tree mode (currently) behaves as CoNNL-U mode in terms of export
+        if mode == TextMode then unhide tsvDlSpan else unhide treebankDlSpan
         element nHitsSpan # set text ((show $ length l1Col) ++ " hits")
         unhide nHitsSpan
         getBody window #+ [element table, element nHitsSpan]
@@ -256,7 +275,8 @@ buildTable window l1Data l2Data mode = do
                         ("text-align", "left")
                       , ("padding", "8px")
                       , ("white-space", "pre-wrap")
-                      , ("font-family", if mode == CoNNLU 
+                      , ("overflow", "auto")
+                      , ("font-family", if mode == CoNNLUMode 
                                           then "monospace, monospace"
                                           else "inherit")
                       ]

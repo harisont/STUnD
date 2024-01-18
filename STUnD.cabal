@@ -19,7 +19,8 @@ executable stund-gui
         directory,
         bytestring,
         text,
+        pretty,
         threepenny-gui,
-        gf-ud,
+        gf-ud, deptreehs,
         l2-ud
     default-language: Haskell2010
