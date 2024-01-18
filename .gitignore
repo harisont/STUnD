@@ -1,3 +1,6 @@
 # Haskell artifacts
 .stack-work/*
 stack.yaml.lock
+
+# tmp files
+*tmp*
