@@ -12,7 +12,7 @@ extra-deps:
 - github: harisont/concept-alignment
   commit: 5d7718ecdad05001b68b68ec42094d399fdef508 # l2-ud branch
 - github: harisont/L2-UD
-  commit: 51415c8784d81b263bd809fb4efac526dc0b2b1c # 2l-ud branch
+  commit: 1ecc60fdebb86a44f89635bc08323badbc1485d9 # 2l-ud branch
 - github: harisont/hs-md
   commit: 62e5e955709c332bcc8043678a116fbb38ab455b
 # currently only used for visualizations but will replace gf-ud dependency
