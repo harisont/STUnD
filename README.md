@@ -121,12 +121,18 @@ Switching to CoNNL-U mode allows to inspect the CoNNL-U (sub)trees __correspondi
 
 ![CoNNL-U mode](img/conllu.png)
 
+
+### Tree mode (__experimental__)
+In newer versions of STUnD (not yet released, but available upon compiling the `main` branch), switching to tree mode lets the user visualize the extracted subtrees:
+
+![Tree mode](img/tree.png)
+
 ### Saving the search results
 After running a query, one or two links will appear next to the search button. These can be used to export the search results.
 
 Text results can be saved as a single TSV file, that can be imported to any spreadsheet program.
 
-In CoNNL-U mode, the L1 and L2 can be saved as two separate CoNNL-U files. You will therefore see two links:
+In CoNNL-U and tree mode, the L1 and L2 can be saved as two separate CoNNL-U files. You will therefore see two links:
 
 ![saving](img/saving.png)
 
