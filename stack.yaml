@@ -17,7 +17,7 @@ extra-deps:
   commit: 62e5e955709c332bcc8043678a116fbb38ab455b
 # currently only used for visualizations but will replace gf-ud dependency
 - github: harisont/deptreehs
-  commit: b3f096fe71d18ea112db8fcecb763ed138c6d6ad
+  commit: 14613f97a4fe1ef80644bddf3b91b3341f875442
 
 flags:
   gf:
