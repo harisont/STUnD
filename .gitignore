@@ -4,3 +4,5 @@ stack.yaml.lock
 
 # tmp files
 *tmp*
+
+PruneWOs.hs
