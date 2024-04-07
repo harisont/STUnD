@@ -172,4 +172,17 @@ While L2-UD (where "L2" stands for "second language") was originally developed f
 
 The GUI is currently implemented [threepenny-gui](https://hackage.haskell.org/package/threepenny-gui), but planned to evolve in a proper web application.
 
+## Citing
+If you use this tool, you are welcome to cite
+
+```
+@inproceedings{masciolini2024stund,
+  title={{STUnD}: ett S{\"o}kverktyg f{\"o}r Tv{\aa}spr{\aa}kiga Universal Dependencies-tr{\"a}dbanker},
+  author={Masciolini, Arianna and T{\'o}th, M{\'a}rton A},
+  booktitle={Huminfra Conference},
+  pages={95--109},
+  year={2024}
+}
+```
+
 [^1]: technical note: this works because all extracted subtrees are adjusted so that they have a root node and valid (sequential) IDs.   
