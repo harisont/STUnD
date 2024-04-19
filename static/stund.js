@@ -103,8 +103,7 @@ async function sendData() {
     var queryElement = document.getElementById("query");
     // Replace empty query by the default value TRUE
     if (queryElement.value == "") {
-	queryElement.value="TRUE";
-	// queryElement.value="[(DEPREL_ \"root\",DEPREL_ \"root\")]";
+	queryElement.value="DEPREL_ \"root\"";
     }
     // Checks the query
     var result = await checkQuery(queryElement);
