@@ -120,6 +120,48 @@ async function sendData() {
 	const response = await fetch("/search_treebanks", {
 	    method: "POST",
 	    body: formData,
-  });
+	}).then((response) => response.json());
+	// Update the page with the results
+	console.log(response)
+	document.getElementById("hitsSpan").textContent = "";
+	document.getElementById("hitsSpan").append(response.l1.length + " hits")
+	var downloadsspan = document.getElementById("downloadsSpan");
+	while (downloadsspan.firstChild) {
+	    // The list is LIVE so it will re-index each call
+	    downloadsspan.removeChild(downloadsspan.firstChild);
+	}
+	var l1link = document.createElement("a");
+	l1link.href="/tmp_file?filename=" + response.l1file;
+	l1link.text="L1 file";
+	l1link.target="_blank";
+	downloadsspan.append(l1link);
+	var l2link = document.createElement("a");
+	l2link.href="/tmp_file?filename=" + response.l2file;
+	l2link.text="L2 file";
+	l2link.target="_blank";
+	downloadsspan.append(l2link);
+	var l1l2link = document.createElement("a");
+	l1l2link.href="/tmp_file?filename=" + response.l1l2file;
+	l1l2link.text="L1-L2 file";
+	l1l2link.target="_blank";
+	downloadsspan.append(l1l2link);
+	if (document.getElementById("conllMode").checked) {
+	    document.getElementById("l1resultSpan").style.fontFamily="monospace,monospace";
+	    document.getElementById("l2resultSpan").style.fontFamily="monospace,monospace";
+	}
+	else {
+	    document.getElementById("l1resultSpan").style.fontFamily="inherit";
+	    document.getElementById("l2resultSpan").style.fontFamily="inherit";
+	}
+	var l2result = ""
+	for (line of response.l2) {
+	    l2result = l2result + "<p>" + line + "</p>";
+	}
+	document.getElementById("l2resultSpan").innerHTML = l2result;
+	var l1result = ""
+	for (line of response.l1) {
+	    l1result = l1result + "<p>" + line + "</p>";
+	}
+	document.getElementById("l1resultSpan").innerHTML = l1result;
     }
 }
