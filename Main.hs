@@ -10,8 +10,9 @@ Stability   : experimental
 module Main where
 
 import Text.Read (readMaybe)
-import Data.Text.Lazy.Encoding (decodeUtf8)
+import Data.Text.Lazy.Encoding (encodeUtf8, decodeUtf8)
 import Data.Maybe
+import Data.List.Utils
 import Text.PrettyPrint (render)
 
 import UDConcepts
