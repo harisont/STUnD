@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+  </head>
+  <body>
+    <script src="/static/stund.js"></script>
+    <form id="searchform" method="post" action="/search_treebanks" enctype="multipart/form-data">
+      <div width="100%">
+	<span style="display: inline-block; width: 5%">
+	  <label for="l2treebank">L2 treebank</label>
+	</span>
+	<span id="l2span" style="display: inline-block; width: 44%">
+	  <input id="l2treebank" name="l2treebank" type="file" accept=".conll, .conllu"></input>
+	</span>
+	<span style="display: inline-block; width: 5%">
+	  <label for="l1treebank">L1 treebank (optional)</label>
+	</span>
+	<span id="l1span" style="display: inline-block; width: 44%">
+	  <input id="l1treebank" name="l1treebank" type="file" accept=".conll, .conllu"></input>
+	</span>
+      </div>
+      <div width="100%">
+	<span style="display: inline-block; width: 5%">
+	  <label for="query">Query</label>
+	</span>
+	<span style="display: inline-block; width: 93%">
+	  <input id="query" name="query" type="text" placeholder="L1-L2 or single-language (matched on L2) query" style="width: 100%"></input>
+	</span>
+      </div>
+      <div width="100%">
+	<span style="display: inline-block; width: 5%">
+	  <label for="replacement">Replacement</label>
+	</span>
+	<span style="display: inline-block; width: 93%">
+	  <input id="replacement" name="replacement" type="text" placeholder="additional replacement rule (optional)" style="width: 100%"></input>
+	</span>
+      </div>
+      <div>
+	<span style="display: inline-block; width: 5%">
+	  <label for="mode">Mode</label>
+	</span>
+	<span style="display: inline-block; width: 10%">
+	  <input type="radio" id="textMode" name="mode" value="TextMode" checked>Text</input>
+	  <input type="radio" id="conllMode" name="mode" value="CoNNLUMode">CoNLL-U</input>
+	  <input type="radio" id="treeMode" name="mode" value="TreeMode">tree</input>
+	</span>
+	<input type="button" value="search" onclick="sendData()" />
+	<input type="reset" value="reset" />
+	<input type="submit" />
+      </div>
+    </form>
+    <div id="errorDiv"></div>
+  </body>
+</html>
