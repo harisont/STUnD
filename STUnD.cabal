@@ -16,11 +16,13 @@ executable stund-gui
     build-depends:
         base,
         MissingH,
-        directory,
-        bytestring,
         text,
         pretty,
-        threepenny-gui,
+        containers,
+        scotty >= 0.22,
+        wai-extra,
+        wai-middleware-static,
+        aeson,
         gf-ud, deptreehs,
         l2-ud
     default-language: Haskell2010
