@@ -19,9 +19,12 @@ executable stund-gui
         text,
         pretty,
         containers,
+        temporary,
+        directory,
         scotty >= 0.22,
         wai-extra,
         wai-middleware-static,
+        http-types,
         aeson,
         gf-ud, deptreehs,
         l2-ud
