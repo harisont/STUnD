@@ -94,8 +94,8 @@ searchTreebanks =
                        then Just $ CHANGES []
                        else readMaybe replacementTxt
     liftIO $ putStrLn $ show patterns
-    -- Convert to sentences
-    let l1Sents = parseUDText $ T.unpack l1Text
+    -- Convert to sentences. If the L1 treebank is empty use a copy of the L2 treebank
+    let l1Sents = if (not . null . T.unpack) l1Text then parseUDText $ T.unpack l1Text else parseUDText $ T.unpack l2Text
     let l2Sents = parseUDText $ T.unpack l2Text
     -- Align sentences
     let treebank = l1Sents `zip` l2Sents
