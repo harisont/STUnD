@@ -26,14 +26,20 @@ import Errors
 import Data.Text.Lazy (Text)
 import qualified Data.Text.Lazy as T
 import qualified Data.Map as M
-
+import qualified Data.List as L
 import Web.Scotty
+import qualified Web.Scotty as S
 import Network.Wai.Middleware.RequestLogger
 import Network.Wai.Middleware.Static
 import Network.Wai.Parse (fileName, fileContent, defaultParseRequestBodyOptions)
+import Network.HTTP.Types.Status (mkStatus)
+import System.Directory
+import System.IO.Temp
 
 import Data.Aeson (ToJSON)
 import GHC.Generics
+
+import Debug.Trace
 
 data Mode = TextMode | CoNNLUMode | TreeMode deriving (Eq, Read, Show, Enum)
 
@@ -43,8 +49,30 @@ data ParseStatus = Status {
   patterns :: Maybe [String]
   } deriving (Generic, Show)
 
-instance ToJSON ParseStatus
+data AlignmentResult = Result {
+  l1 :: [String],
+  l2 :: [String],
+  l1file :: String,
+  l2file :: String,
+  l1l2file :: String
+  } deriving (Generic, Show)
 
+instance ToJSON ParseStatus
+instance ToJSON AlignmentResult
+
+-- Directory for temporary files
+-- OBS: Will be removed and re-created on startup
+tmpPath :: String
+tmpPath = "tmp"
+
+debugOn = False
+debug :: String -> String -> ActionM ()
+debug msg var =
+  if debugOn then
+    liftIO $ putStrLn $ msg ++ "::\n" ++ var
+  else
+    return ()
+    
 handleRoot :: ActionM ()
 handleRoot =
   do
@@ -140,35 +168,59 @@ searchTreebanks =
                          ))
                   ms)
             matches'
+    l1l2Tmpfile <- liftIO $ writeTempFile tmpPath "l1-l2-.tsv" $
+      unlines $ map
+        (\(l1,l2) -> l1 ++ "\t" ++ l2)
+        ((map rmBold l1Col) `zip` (map rmBold l2Col))
+    l1Tmpfile <- liftIO $ writeTempFile tmpPath "l1-.htm" $ unlines l1Col
+    l2Tmpfile <- liftIO $ writeTempFile tmpPath "l2-.htm" $ unlines l2Col
 --           -- destroyTables window
 --   --   table <- buildTable window l1Col l2Col mode
---   --   liftIO $ writeFile path (encodeUtf8 $ pack $ unlines $ map
---   --                             (\(l1,l2) -> l1 ++ "\t" ++ l2)
---   --                             ((map rmBold l1Col) `zip` (map rmBold l2Col)))
---   --   liftIO $ writeFile path1 (encodeUtf8 $ pack $ unlines l1Col)
---   --   liftIO $ writeFile path2 (encodeUtf8 $ pack $ unlines l2Col)
 --   --     -- tree mode (currently) behaves as CoNNL-U mode in terms of export
 --   --   if mode == TextMode then unhide tsvDlSpan else unhide treebankDlSpan
 --   --   element nHitsSpan # set text ((show $ length l1Col) ++ " hits")
 --   --   unhide nHitsSpan
 --   --   getBody window #+ [element table, element nHitsSpan]
-    json [l1Col, l2Col]
+    json $ Result { l1 = l1Col, l2 = l2Col, l1file = l1Tmpfile, l2file = l2Tmpfile, l1l2file = l1l2Tmpfile }
       where
+        rmBold s = replace "</b>" "" (replace "<b>" "" s)
         applyReplacement r (e1,e2) =
           (fst $ replacementsWithUDPattern r e1,
            fst $ replacementsWithUDPattern r e2)
 
-
+downloadTmpFile :: ActionM ()
+downloadTmpFile =
+  do
+    fileName <- queryParam "filename"
+    if L.isPrefixOf tmpPath fileName then
+      do
+        setHeader "Content-Type" "text/plain; charset=utf-8"
+        file fileName 
+    else
+      S.status $ mkStatus 403 "Access denied"
 main :: IO ()
 main =
-  scotty 3000 $
   do
-    middleware logStdoutDev
-    middleware static
-    get "/" $ handleRoot
-    get "/check_query" $ checkQuery
-    get "/check_replacement" $ checkReplacement
-    post "/search_treebanks" $ searchTreebanks
+    -- Cleanup old temporary directory if it exists
+    tmpExists <- doesDirectoryExist tmpPath
+    if tmpExists then
+      removeDirectoryRecursive tmpPath
+    else
+      return ()
+    -- Create directory for temporary files
+    createDirectory tmpPath
+    -- Start the web server
+    scotty 3000 $
+      do
+        -- Logs requests
+        middleware logStdoutDev
+        -- Handles static files
+        middleware static
+        get "/" $ handleRoot
+        get "/check_query" $ checkQuery
+        get "/check_replacement" $ checkReplacement
+        post "/search_treebanks" $ searchTreebanks
+        get "/tmp_file/" $ downloadTmpFile
 
       
 -- buildTable :: Window -> [String] -> [String] -> Mode -> UI Element
