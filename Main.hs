@@ -10,6 +10,7 @@ Stability   : experimental
 module Main where
 
 import Text.Read (readMaybe)
+import Data.Text.Lazy.Encoding (decodeUtf8)
 import Data.Maybe
 import Text.PrettyPrint (render)
 
@@ -80,8 +81,9 @@ searchTreebanks =
     -- Get tehe file mode
     mode <- read <$> formParam "mode"
     -- Get text for both files
-    let l1Text = show $ fileContent $ formFiles M.! "l1treebank"
-    let l2Text = show $ fileContent $ formFiles M.! "l2treebank"
+    let l1Text = decodeUtf8 $ fileContent $ formFiles M.! "l1treebank"
+    let l2Text = decodeUtf8 $ fileContent $ formFiles M.! "l2treebank"
+    liftIO $ putStrLn $ T.unpack l2Text
     -- Get pattern and replacement
     queryTxt <- formParam "query"
     replacementTxt <- formParam "replacement"
@@ -93,8 +95,8 @@ searchTreebanks =
                        else readMaybe replacementTxt
     liftIO $ putStrLn $ show patterns
     -- Convert to sentences
-    let l1Sents = parseUDText l1Text
-    let l2Sents = parseUDText l2Text
+    let l1Sents = parseUDText $ T.unpack l1Text
+    let l2Sents = parseUDText $ T.unpack l2Text
     -- Align sentences
     let treebank = l1Sents `zip` l2Sents
     let alignments = map align treebank
