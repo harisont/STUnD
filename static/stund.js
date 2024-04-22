@@ -88,12 +88,6 @@ async function sendData() {
     removeErrorMessages();
     resetAllErrors();
     var error = false;
-    var l1treebank = document.getElementById("l1treebank").value;
-    // The L1 treebank is actually optional
-    // if (l1treebank == "") {
-    // 	markError(document.getElementById("l1span"));
-    // 	addErrorMessage("L1 treebank is required");
-    // }
     var l2treebank = document.getElementById("l2treebank").value;
     if (l2treebank == "") {
 	markError(document.getElementById("l2span"));
@@ -101,7 +95,7 @@ async function sendData() {
 	error = true;
     }
     var queryElement = document.getElementById("query");
-    // Replace empty query by the default value TRUE
+    // Replace empty query by the default value
     if (queryElement.value == "") {
 	queryElement.value="DEPREL_ \"root\"";
     }
@@ -121,9 +115,7 @@ async function sendData() {
 	    body: formData,
 	}).then((response) => response.json());
 	// Update the page with the results
-	console.log(response)
-	document.getElementById("hitsSpan").textContent = "";
-	document.getElementById("hitsSpan").append(response.l1.length + " hits")
+	document.getElementById("hitsSpan").textContent = response.l1.length + " hits";
 	var downloadsspan = document.getElementById("downloadsSpan");
 	while (downloadsspan.firstChild) {
 	    // The list is LIVE so it will re-index each call

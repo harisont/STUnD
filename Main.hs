@@ -112,7 +112,6 @@ searchTreebanks =
     -- Get text for both files
     let l1Text = decodeUtf8 $ fileContent $ formFiles M.! "l1treebank"
     let l2Text = decodeUtf8 $ fileContent $ formFiles M.! "l2treebank"
-    liftIO $ putStrLn $ T.unpack l2Text
     -- Get pattern and replacement
     queryTxt <- formParam "query"
     replacementTxt <- formParam "replacement"
@@ -122,7 +121,6 @@ searchTreebanks =
     let mreplacement = if null replacementTxt
                        then Just $ CHANGES []
                        else readMaybe replacementTxt
-    liftIO $ putStrLn $ show patterns
     -- Convert to sentences. If the L1 treebank is empty use a copy of the L2 treebank
     let l1Sents = if (not . null . T.unpack) l1Text then parseUDText $ T.unpack l1Text else parseUDText $ T.unpack l2Text
     let l2Sents = parseUDText $ T.unpack l2Text
@@ -175,13 +173,6 @@ searchTreebanks =
         ((map rmBold l1Col) `zip` (map rmBold l2Col))
     l1Tmpfile <- liftIO $ writeTempFile tmpPath "l1-.htm" $ unlines l1Col
     l2Tmpfile <- liftIO $ writeTempFile tmpPath "l2-.htm" $ unlines l2Col
---           -- destroyTables window
---   --   table <- buildTable window l1Col l2Col mode
---   --     -- tree mode (currently) behaves as CoNNL-U mode in terms of export
---   --   if mode == TextMode then unhide tsvDlSpan else unhide treebankDlSpan
---   --   element nHitsSpan # set text ((show $ length l1Col) ++ " hits")
---   --   unhide nHitsSpan
---   --   getBody window #+ [element table, element nHitsSpan]
     json $ Result { l1 = l1Col, l2 = l2Col, l1file = l1Tmpfile, l2file = l2Tmpfile, l1l2file = l1l2Tmpfile }
       where
         rmBold s = replace "</b>" "" (replace "<b>" "" s)
