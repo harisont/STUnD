@@ -99,6 +99,24 @@ function createTmpLink(file, text) {
     return link;
 }
 
+/*
+  Creates a new line in the result table, i.e. a div with two spans
+
+  Returns a new <div> element
+*/
+function createLine(leftField,rightField) {
+    var lineDiv = document.createElement("div"),
+	leftSpan = document.createElement("span"),
+	rightSpan = document.createElement("span");
+    leftSpan.classList.add("resultCell")
+    rightSpan.classList.add("resultCell")
+    leftSpan.innerHTML=leftField;
+    rightSpan.innerHTML=rightField;
+    lineDiv.append(leftSpan);
+    lineDiv.append(rightSpan);
+    return lineDiv;
+}
+
 async function sendData() {
     // Remove all previous errors
     removeErrorMessages();
