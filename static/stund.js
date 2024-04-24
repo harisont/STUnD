@@ -1,3 +1,5 @@
+"use strict";
+
 /*
   Adds the error class and red background to one element
 */
