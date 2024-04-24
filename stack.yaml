@@ -5,20 +5,11 @@ packages:
 
 extra-deps:
 - MissingH-1.6.0.1
-- github: GrammaticalFramework/gf-core
-  commit: 810640822dc3047af8fd9d7988e3f2423595c7b2
-- github: GrammaticalFramework/gf-ud
-  commit: 1a4a8c1ac08c02895fa886ca20e5e7a706f484e2
 - github: harisont/concept-alignment
-  commit: 5d7718ecdad05001b68b68ec42094d399fdef508 # l2-ud branch
+  commit: 21b27c727ed69b8212a4fc017a68ea3305525e15 # l2-ud branch
 - github: harisont/L2-UD
-  commit: 1ecc60fdebb86a44f89635bc08323badbc1485d9 # 2l-ud branch
+  commit: cc206d35bbcf5679e200271d82ddc30e0aa2de9e # 2l-ud branch
 - github: harisont/hs-md
   commit: 62e5e955709c332bcc8043678a116fbb38ab455b
-# currently only used for visualizations but will replace gf-ud dependency
 - github: harisont/deptreehs
-  commit: 1f9bf9833ab52b08ed52ce117a28e10e97377342
-
-flags:
-  gf:
-    server: false
+  commit: 7ba859321f03e7c7ed1e287809396982532bf833

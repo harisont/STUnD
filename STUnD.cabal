@@ -21,6 +21,6 @@ executable stund-gui
         text,
         pretty,
         threepenny-gui,
-        gf-ud, deptreehs,
+        deptreehs,
         l2-ud
     default-language: Haskell2010
