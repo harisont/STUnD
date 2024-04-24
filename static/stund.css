@@ -1,0 +1,15 @@
+.error {
+    background-color: red;
+}
+.errorMsg {
+    color: red;
+}
+
+.tmpLink {
+    margin: 10px;
+}
+
+.resultCell {
+    display: inline-block;
+    width: 49%;
+}
