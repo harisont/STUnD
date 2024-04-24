@@ -3,7 +3,6 @@
 */
 function markError(element) {
     element.classList.add("error");
-    element.style.background="red";
 }
 
 /*
@@ -11,7 +10,6 @@ function markError(element) {
 */
 function resetError(element) {
     element.classList.remove("error");
-    element.style.removeProperty("background-color");
 }
 
 /*
@@ -20,7 +18,6 @@ function resetError(element) {
 function addErrorMessage(message) {
     var errordiv = document.getElementById("errorDiv");
     var errorp = document.createElement("p");
-    errorp.style.color="red";
     errorp.append(message);
     errordiv.append(errorp);
 }
