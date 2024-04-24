@@ -25,10 +25,11 @@ function resetError(element) {
   Adds a new error message in red to the error div
 */
 function addErrorMessage(message) {
-    var errordiv = document.getElementById("errorDiv");
-    var errorp = document.createElement("p");
-    errorp.append(message);
-    errordiv.append(errorp);
+    var errorDiv = document.getElementById("errorDiv"),
+        errorP = document.createElement("p");
+    errorP.classList.add("errorMsg");
+    errorP.append(message);
+    errorDiv.append(errorP);
 }
 
 /*
@@ -143,14 +144,14 @@ async function sendData() {
 	error = error || !result	
     }
     if (!error) {
-	var formData = new FormData(document.getElementById("searchform"));
+	var formData = new FormData(document.getElementById("searchForm"));
 	const response = await fetch("/search_treebanks", {
 	    method: "POST",
 	    body: formData,
 	}).then((response) => response.json());
 	// Update the page with the results
 	document.getElementById("hitsSpan").textContent = response.l1.length + " hits";
-	var downloadsspan = document.getElementById("downloadsSpan");
+	var downloadsSpan = document.getElementById("downloadsSpan");
 	// Cleanup old downloads
 	removeChildren(downloadsSpan);
 	downloadsSpan.append(createTmpLink(response.l1file, "L1 file"));
