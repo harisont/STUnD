@@ -17,13 +17,14 @@ import System.Directory
 import Text.PrettyPrint (render)
 import Graphics.UI.Threepenny.Core
 import qualified Graphics.UI.Threepenny as UI
-import UDConcepts
-import UDPatterns
-import VisualizeUD
+import UDStandard
+import UDTrees
+import UDPatterns hiding (matchingSubtrees)
+import UDVisualizations
 import Utils.UDConcepts
 import Utils.Output
 import Align
-import Match hiding (matchesUDPattern)
+import Match
 import Errors
 
 data Mode = TextMode | CoNNLUMode | TreeMode deriving (Eq, Show)
@@ -160,8 +161,8 @@ setup window = do
         markRight replacementInput
         l1Text <- liftIO $ readFile l1Path
         l2Text <- liftIO $ readFile l2Path 
-        let l1Sents = (parseUDText . unpack . decodeUtf8) l1Text
-        let l2Sents = (parseUDText . unpack . decodeUtf8) l2Text
+        let l1Sents = (prsUDText . unpack . decodeUtf8) l1Text
+        let l2Sents = (prsUDText . unpack . decodeUtf8) l2Text
 
         let treebank = l1Sents `zip` l2Sents 
         let alignments = map align treebank
@@ -175,7 +176,7 @@ setup window = do
                   in if isL2only $ pattern 
                     then ((s1,s2), ms ++ ((repeat $ dummyUDTree) `zip` filter 
                       (\t -> not $ t `elem` (map snd ms)) 
-                      (matchesUDPattern (snd $ (pattern)) (udSentence2tree s2))))
+                      (matchingSubtrees (snd $ (pattern)) (sentence2tree s2))))
                     else bms) )
                 bimatches
         let matches' = 
@@ -189,17 +190,17 @@ setup window = do
                   (\(m1,m2) -> 
                     let m1' = 
                           if m1 == dummyUDTree 
-                            then udTree2sentence m1 
-                            else udTree2sentence (adjustRootAndPositions m1)
-                        m2' = udTree2sentence (adjustRootAndPositions m2)
+                            then tree2sentence m1 
+                            else tree2sentence (subtree2tree m1)
+                        m2' = tree2sentence (subtree2tree m2)
                     in ((case mode of
-                            TextMode -> highlin s1 (udTree2sentence m1) HTML
+                            TextMode -> highlin s1 (tree2sentence m1) HTML
                             CoNNLUMode -> (prt m1') ++ "\n"
-                            TreeMode -> render $ conll2svg $ prt m1',
+                            TreeMode -> sentence2svgFragment m1',
                          case mode of
-                            TextMode -> highlin s2 (udTree2sentence m2) HTML
+                            TextMode -> highlin s2 (tree2sentence m2) HTML
                             CoNNLUMode -> (prt m2') ++ "\n"
-                            TreeMode -> render $ conll2svg $ prt m2')
+                            TreeMode -> sentence2svgFragment m2')
                     )) 
                   ms) 
               matches'
