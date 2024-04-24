@@ -85,6 +85,20 @@ async function checkReplacement(replacementElement) {
     return !error;
 }
 
+/*
+  Creates the link to a temporary file.
+
+  Returns a new <a> element
+*/
+function createTmpLink(file, text) {
+    var link = document.createElement("a");
+    link.href = "/tmp_file?filename=" + file;
+    link.text = text;
+    link.target = "_blank";
+    link.classList = "tmpLink";
+    return link;
+}
+
 async function sendData() {
     // Remove all previous errors
     removeErrorMessages();
@@ -119,23 +133,11 @@ async function sendData() {
 	// Update the page with the results
 	document.getElementById("hitsSpan").textContent = response.l1.length + " hits";
 	var downloadsspan = document.getElementById("downloadsSpan");
-	var l1link = document.createElement("a");
-	l1link.href="/tmp_file?filename=" + response.l1file;
-	l1link.text="L1 file";
-	l1link.target="_blank";
-	downloadsspan.append(l1link);
-	var l2link = document.createElement("a");
-	l2link.href="/tmp_file?filename=" + response.l2file;
-	l2link.text="L2 file";
-	l2link.target="_blank";
-	downloadsspan.append(l2link);
-	var l1l2link = document.createElement("a");
-	l1l2link.href="/tmp_file?filename=" + response.l1l2file;
-	l1l2link.text="L1-L2 file";
-	l1l2link.target="_blank";
-	downloadsspan.append(l1l2link);
 	// Cleanup old downloads
 	removeChildren(downloadsSpan);
+	downloadsSpan.append(createTmpLink(response.l1file, "L1 file"));
+	downloadsSpan.append(createTmpLink(response.l2file, "L2 file"));
+	downloadsSpan.append(createTmpLink(response.l1l2file, "L1-L2 file"));
 	// Cleanup old results
 	removeChildren(resultsDiv);
 	if (document.getElementById("conllMode").checked) {
