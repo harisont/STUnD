@@ -1,6 +1,13 @@
 "use strict";
 
 /*
+  Removes all children from an element
+*/
+function removeChildren(element) {
+    Array.from(element.children).map((c) => c.remove());
+}
+
+/*
   Adds the error class and red background to one element
 */
 function markError(element) {
@@ -28,11 +35,7 @@ function addErrorMessage(message) {
   Remove all error messages from the error div
  */
 function removeErrorMessages() {
-    var errordiv = document.getElementById("errorDiv");
-    while (errordiv.firstChild) {
-	// The list is LIVE so it will re-index each call
-	errordiv.removeChild(errordiv.firstChild);
-    }
+    removeChildren(document.getElementById("errorDiv"));
 }
 
 /*
@@ -116,10 +119,6 @@ async function sendData() {
 	// Update the page with the results
 	document.getElementById("hitsSpan").textContent = response.l1.length + " hits";
 	var downloadsspan = document.getElementById("downloadsSpan");
-	while (downloadsspan.firstChild) {
-	    // The list is LIVE so it will re-index each call
-	    downloadsspan.removeChild(downloadsspan.firstChild);
-	}
 	var l1link = document.createElement("a");
 	l1link.href="/tmp_file?filename=" + response.l1file;
 	l1link.text="L1 file";
@@ -135,6 +134,10 @@ async function sendData() {
 	l1l2link.text="L1-L2 file";
 	l1l2link.target="_blank";
 	downloadsspan.append(l1l2link);
+	// Cleanup old downloads
+	removeChildren(downloadsSpan);
+	// Cleanup old results
+	removeChildren(resultsDiv);
 	if (document.getElementById("conllMode").checked) {
 	    document.getElementById("l1resultSpan").style.fontFamily="monospace,monospace";
 	    document.getElementById("l2resultSpan").style.fontFamily="monospace,monospace";
