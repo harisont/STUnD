@@ -140,14 +140,12 @@ async function sendData() {
 	downloadsSpan.append(createTmpLink(response.l1l2file, "L1-L2 file"));
 	// Cleanup old results
 	removeChildren(resultsDiv);
+	// Set font depending on mode
 	if (document.getElementById("conllMode").checked) {
-	    document.getElementById("l1resultSpan").style.fontFamily="monospace,monospace";
-	    document.getElementById("l2resultSpan").style.fontFamily="monospace,monospace";
+	    resultsDiv.style.fontFamily="monospace,monospace";
 	}
 	else {
-	    document.getElementById("l1resultSpan").style.fontFamily="inherit";
-	    document.getElementById("l2resultSpan").style.fontFamily="inherit";
-	}
+	    resultsDiv.style.fontFamily="inherit";
 	var l2result = ""
 	for (line of response.l2) {
 	    l2result = l2result + "<p>" + line + "</p>";
