@@ -43,7 +43,7 @@ function removeErrorMessages() {
   Removes the error class and red background from all elements in the class
  */
 function resetAllErrors() {
-    for (const e of document.getElementsByClassName("error")) {
+    for (const e of Array.from(document.getElementsByClassName("error"))) {
 	resetError(e);
     }
 }
