@@ -156,6 +156,7 @@ async function sendData() {
 	downloadsSpan.append(createTmpLink(response.l1file, "L1 file"));
 	downloadsSpan.append(createTmpLink(response.l2file, "L2 file"));
 	downloadsSpan.append(createTmpLink(response.l1l2file, "L1-L2 file"));
+	var resultsDiv = document.getElementById("resultsDiv");
 	// Cleanup old results
 	removeChildren(resultsDiv);
 	// Set font depending on mode
@@ -164,15 +165,9 @@ async function sendData() {
 	}
 	else {
 	    resultsDiv.style.fontFamily="inherit";
-	var l2result = ""
-	for (line of response.l2) {
-	    l2result = l2result + "<p>" + line + "</p>";
 	}
-	document.getElementById("l2resultSpan").innerHTML = l2result;
-	var l1result = ""
-	for (line of response.l1) {
-	    l1result = l1result + "<p>" + line + "</p>";
+	for (var index = 0; index < response.l1.length; index++) {
+	    resultsDiv.append(createLine(response.l1[index],response.l2[index]));
 	}
-	document.getElementById("l1resultSpan").innerHTML = l1result;
     }
 }
