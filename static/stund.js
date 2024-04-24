@@ -170,6 +170,9 @@ async function sendData() {
 	else {
 	    resultsDiv.style.fontFamily="inherit";
 	}
+	document.getElementById("l1file").value = response.l1file;
+	document.getElementById("l2file").value = response.l2file;
+	document.getElementById("l1l2file").value = response.l1l2file;
 	for (var index = 0; index < response.l1.length; index++) {
 	    resultsDiv.append(createLine(response.l1[index],response.l2[index]));
 	}
