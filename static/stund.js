@@ -118,6 +118,9 @@ function createLine(leftField,rightField) {
     return lineDiv;
 }
 
+/*
+  Sends the form data to the server and updates the user interface based on the result.
+*/
 async function sendData() {
     // Remove all previous errors
     removeErrorMessages();
