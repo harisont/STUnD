@@ -149,6 +149,8 @@ async function sendData() {
     if (!error) {
 	// Get the form data
 	var formData = new FormData(document.getElementById("searchForm"));
+	// Show overlay
+	showOverlay();
 	// Send the request. Because we "await" the fetch, this will block
 	const response = await fetch("/search_treebanks", {
 	    method: "POST",
@@ -181,5 +183,21 @@ async function sendData() {
 	for (var index = 0; index < response.l1.length; index++) {
 	    resultsDiv.append(createLine(response.l1[index],response.l2[index]));
 	}
+	// Hide the overlay when we are done
+	hideOverlay();
     }
+}
+
+/*
+  Shows the overlay while the process in operation
+*/
+function showOverlay() {
+    document.getElementById("overlay").style.display = "block";
+}
+
+/*
+  Hides the overlay again
+*/
+function hideOverlay() {
+    document.getElementById("overlay").style.display = "none";
 }
