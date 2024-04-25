@@ -123,9 +123,13 @@ function createLine(leftField,rightField) {
 */
 function handleFetchError(error) {
     document.getElementById("overlay").style.background="red";
-    document.getElementById("icon").style.animation="Initial";
-    document.getElementById("icon").style.transform="scaleY(-1)";
-    document.getElementById("overlayContent").append("Something went wrong: " + error);
+    var icon = document.getElementById("icon");
+    icon.style.animation="Initial";
+    icon.style.transform="scaleY(-1)";
+    var overlayContent = document.getElementById("overlayContent");
+    overlayContent.append("Something went wrong :(")
+    overlayContent.append(document.createElement("br"));
+    overlayContent.append(error.message);
 }
 
 /*
