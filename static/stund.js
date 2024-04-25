@@ -184,9 +184,12 @@ async function sendData() {
 	// Cleanup old download links
 	removeChildren(downloadsSpan);
 	// Add new download links
-	downloadsSpan.append(createTmpLink(response.l1file, "L1 file"));
-	downloadsSpan.append(createTmpLink(response.l2file, "L2 file"));
-	downloadsSpan.append(createTmpLink(response.l1l2file, "L1-L2 file"));
+    var saveSpan = document.createElement("span")
+    saveSpan.textContent = "- save: "
+    downloadsSpan.append(saveSpan)
+	downloadsSpan.append(createTmpLink(response.l1file, "T1 file"));
+	downloadsSpan.append(createTmpLink(response.l2file, "T2 file"));
+	downloadsSpan.append(createTmpLink(response.l1l2file, "parallel file"));
 	var resultsDiv = document.getElementById("resultsDiv");
 	// Cleanup old results
 	removeChildren(resultsDiv);
