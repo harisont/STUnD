@@ -26,6 +26,6 @@ executable stund-gui
         wai-middleware-static,
         http-types,
         aeson,
-        gf-ud, deptreehs,
+        deptreehs,
         l2-ud
     default-language: Haskell2010

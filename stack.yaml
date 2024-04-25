@@ -5,19 +5,14 @@ packages:
 
 extra-deps:
 - MissingH-1.6.0.1
-- github: GrammaticalFramework/gf-core
-  commit: 810640822dc3047af8fd9d7988e3f2423595c7b2
-- github: GrammaticalFramework/gf-ud
-  commit: 1a4a8c1ac08c02895fa886ca20e5e7a706f484e2
 - github: harisont/concept-alignment
-  commit: 5d7718ecdad05001b68b68ec42094d399fdef508 # l2-ud branch
+  commit: 21b27c727ed69b8212a4fc017a68ea3305525e15 # l2-ud branch
 - github: harisont/L2-UD
-  commit: 1ecc60fdebb86a44f89635bc08323badbc1485d9 # 2l-ud branch
+  commit: cc206d35bbcf5679e200271d82ddc30e0aa2de9e # 2l-ud branch
 - github: harisont/hs-md
   commit: 62e5e955709c332bcc8043678a116fbb38ab455b
-# currently only used for visualizations but will replace gf-ud dependency
 - github: harisont/deptreehs
-  commit: 1f9bf9833ab52b08ed52ce117a28e10e97377342
+  commit: 7ba859321f03e7c7ed1e287809396982532bf833
 - scotty-0.22@sha256:12365f7867e50368db053b0f3aac96a0bdaace0ff2058cb4a8f17fc10fcea6f7,6022
 - wai-extra-3.1.14@sha256:1b093366842dc0057cebb4a23dbf9a29269321d70fd242c7695ce0bbd80d32fb,8056
 - wai-3.2.4@sha256:e14fde953183f9db8c10da79b44a2b24d241c1203426c5636995069e2dacb1fe,1776
@@ -30,7 +25,3 @@ extra-deps:
 - network-control-0.1.0@sha256:2be9f15bf481862f980426e27a4b2afb65ff2f8e85bf343027d8396af55b72ef,1218
 - time-manager-0.0.1@sha256:4445d343847df0d140972f3d45ca1429d71d186690c2f5fd67a049b4cf66f281,721
 - unix-time-0.4.12@sha256:97abf524e631f9a6fba975c67b4f34f6ba678986c620e1efcef41ded4af58916,2547
-
-flags:
-  gf:
-    server: false
