@@ -109,9 +109,11 @@ searchTreebanks =
     formFiles <- M.fromList <$> files
     -- Get tehe file mode
     mode <- read <$> formParam "mode"
-    l1file <- maybeNull <$> formParamMaybe "l1file"
-    l2file <- maybeNull <$> formParamMaybe "l2file"
-    l1l2file <- maybeNull <$> formParamMaybe "l1l2file"
+
+    l1file <- maybeTmpFile <$> formParamMaybe "l1file"
+    liftIO $ putStrLn $ show l1file
+    l2file <- maybeTmpFile <$> formParamMaybe "l2file"
+    l1l2file <- maybeTmpFile <$> formParamMaybe "l1l2file"
     -- Get text for both files
     let l1Text = decodeUtf8 $ fileContent $ formFiles M.! "l1treebank"
     let l2Text = decodeUtf8 $ fileContent $ formFiles M.! "l2treebank"
@@ -188,11 +190,14 @@ searchTreebanks =
                 return fn
           else
             writeTempFile tmpPath tmpFilePattern content
-        -- Checks the content of a Maybe String and make it Nothing if the String is empty
-        maybeNull :: Maybe String -> Maybe String
-        maybeNull Nothing = Nothing
-        maybeNull (Just []) = Nothing
-        maybeNull (Just s) = Just s
+        -- Checks the content of a Maybe String and make it Nothing if the String is empty or invalid
+        maybeTmpFile :: Maybe String -> Maybe FilePath
+        maybeTmpFile Nothing = Nothing
+        maybeTmpFile (Just []) = Nothing
+        -- Check if it is a file within the tmpPath
+        maybeTmpFile (Just s)
+          | L.isPrefixOf tmpPath s = Just s
+          | otherwise = Nothing
         applyReplacement r (e1,e2) =
           (fst $ replacementsWithUDPattern r e1,
            fst $ replacementsWithUDPattern r e2)
