@@ -72,3 +72,12 @@ body {
 @-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
 @keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
 
+.treebank {
+    width: 49%;
+    display: inline-block;
+}
+
+.pattern, #modebar {
+    padding-top: 0.15%;
+    padding-bottom: 0.15%;
+}

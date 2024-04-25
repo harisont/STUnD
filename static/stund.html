@@ -9,40 +9,44 @@
     <script src="/static/stund.js"></script>
     <form id="searchForm" enctype="multipart/form-data" class="unselectable">
       <div width="100%">
-		<span style="display: inline-block; width: 5%">
-		  <label for="l2treebank">L2 treebank</label>
+		    <span class="treebank">
+			    <span>
+			      <label for="l2treebank">L2 treebank</label>
+			    </span>
+			    <span id="l2span">
+			      <input id="l2treebank" name="l2treebank" type="file" accept=".conll, .conllu"></input>
+			  </span>
 		</span>
-		<span id="l2span" style="display: inline-block; width: 44%">
-		  <input id="l2treebank" name="l2treebank" type="file" accept=".conll, .conllu"></input>
+		<span class="treebank">
+			<span>
+			  <label for="l1treebank">L1 treebank (optional)</label>
+			</span>
+			<span id="l1span">
+			  <input id="l1treebank" name="l1treebank" type="file" accept=".conll, .conllu"></input>
+			</span>
 		</span>
-		<span style="display: inline-block; width: 5%">
-		  <label for="l1treebank">L1 treebank (optional)</label>
-		</span>
-		<span id="l1span" style="display: inline-block; width: 44%">
-		  <input id="l1treebank" name="l1treebank" type="file" accept=".conll, .conllu"></input>
-		</span>
-    	  </div>
-    	  <div width="100%">
-		<span style="display: inline-block; width: 5%">
+      </div>
+      <div width="100%" class="pattern">
+		<span>
 		  <label for="query">Query</label>
 		</span>
-		<span style="display: inline-block; width: 93%">
+		<span>
 		  <input id="query" name="query" type="text" placeholder="L1-L2 or single-language (matched on L2) query" style="width: 100%"></input>
 		</span>
-    	  </div>
-    	  <div width="100%">
-		<span style="display: inline-block; width: 5%">
+      </div>
+      <div width="100%" class="pattern">
+		<span>
 		  <label for="replacement">Replacement</label>
 		</span>
-		<span style="display: inline-block; width: 93%">
+		<span>
 		  <input id="replacement" name="replacement" type="text" placeholder="additional replacement rule (optional)" style="width: 100%"></input>
 		</span>
-    	  </div>
-    	  <div>
-		<span style="display: inline-block; width: 5%">
+      </div>
+      <div id="modebar" >
+		<span>
 		  <label for="mode">Mode</label>
 		</span>
-		<span style="display: inline-block; width: 10%">
+		<span>
 		  <input type="radio" id="textMode" name="mode" value="TextMode" checked>Text</input>
 		  <input type="radio" id="conllMode" name="mode" value="CoNNLUMode">CoNLL-U</input>
 		  <input type="radio" id="treeMode" name="mode" value="TreeMode">tree</input>
@@ -60,8 +64,8 @@
 		<span id="downloadsSpan"></span>
 	</div>
     <div id="resultsDiv">
-      <span id="l2resultSpan" style="display: inline-block; width: 49%"></span>
-      <span id="l1resultSpan" style="display: inline-block; width: 49%"></span>
+      <span id="l2resultSpan" style="width: 49%"></span>
+      <span id="l1resultSpan" style="width: 49%"></span>
     </div>
     <div id="overlay" class="unselectable">
       <div id="overlayContent">
