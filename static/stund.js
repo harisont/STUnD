@@ -147,7 +147,9 @@ async function sendData() {
 	error = error || !result	
     }
     if (!error) {
+	// Get the form data
 	var formData = new FormData(document.getElementById("searchForm"));
+	// Send the request. Because we "await" the fetch, this will block
 	const response = await fetch("/search_treebanks", {
 	    method: "POST",
 	    body: formData,
@@ -155,8 +157,9 @@ async function sendData() {
 	// Update the page with the results
 	document.getElementById("hitsSpan").textContent = response.l1.length + " hits";
 	var downloadsSpan = document.getElementById("downloadsSpan");
-	// Cleanup old downloads
+	// Cleanup old download links
 	removeChildren(downloadsSpan);
+	// Add new download links
 	downloadsSpan.append(createTmpLink(response.l1file, "L1 file"));
 	downloadsSpan.append(createTmpLink(response.l2file, "L2 file"));
 	downloadsSpan.append(createTmpLink(response.l1l2file, "L1-L2 file"));
@@ -170,9 +173,11 @@ async function sendData() {
 	else {
 	    resultsDiv.style.fontFamily="inherit";
 	}
+	// Store the filenames in the hidden fields of the form
 	document.getElementById("l1file").value = response.l1file;
 	document.getElementById("l2file").value = response.l2file;
 	document.getElementById("l1l2file").value = response.l1l2file;
+	// Display all the results
 	for (var index = 0; index < response.l1.length; index++) {
 	    resultsDiv.append(createLine(response.l1[index],response.l2[index]));
 	}
