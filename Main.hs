@@ -231,25 +231,3 @@ main =
         get "/check_replacement" $ checkReplacement
         post "/search_treebanks" $ searchTreebanks
         get "/tmp_file/" $ downloadTmpFile
-
-      
--- buildTable :: Window -> [String] -> [String] -> Mode -> UI Element
--- buildTable window l1Data l2Data mode = do 
---   cells <- mapM (mapM 
---                   (return . (\htmlText -> do
---                     div <- UI.div
---                     element div # set html htmlText
---                     element div # set UI.style [
---                         ("text-align", "left")
---                       , ("padding", "8px")
---                       , ("white-space", "pre-wrap")
---                       , ("overflow", "auto")
---                       , ("font-family", if mode == CoNNLUMode 
---                                           then "monospace, monospace"
---                                           else "inherit")
---                       ]
---                     return div)))
---             (zipWith (\s1 s2 -> [s1,s2]) l1Data l2Data)
---   table <- UI.grid cells
---   element table # set UI.style [("width","100%"), ("table-layout","fixed")]
---   return table
