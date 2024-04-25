@@ -109,6 +109,7 @@ function createLine(leftField,rightField) {
     var lineDiv = document.createElement("div"),
 	leftSpan = document.createElement("span"),
 	rightSpan = document.createElement("span");
+    lineDiv.classList.add("resultRow")
     leftSpan.classList.add("resultCell")
     rightSpan.classList.add("resultCell")
     leftSpan.innerHTML=leftField;

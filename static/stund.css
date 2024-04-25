@@ -1,8 +1,13 @@
-.error {
-    background-color: red;
+body {
+    font-family: arial, sans-serif
 }
+
+.error {
+    background-color: #FF7E7E;
+}
+
 .errorMsg {
-    color: red;
+    background-color: #FF7E7E;
 }
 
 .tmpLink {
@@ -12,6 +17,20 @@
 .resultCell {
     display: inline-block;
     width: 49%;
+    padding: 0.25%;
+    overflow: auto;
+    white-space: pre-wrap;
+}
+
+.resultRow:nth-child(even) {background-color: #dddddd}
+
+.unselectable {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: interspersenone;
 }
 
 /* Code adapted from https://jsfiddle.net/gionaf/Ugc5g/ */
