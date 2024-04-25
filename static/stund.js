@@ -119,6 +119,16 @@ function createLine(leftField,rightField) {
 }
 
 /*
+  Handle fetch errors by updating the overlay
+*/
+function handleFetchError(error) {
+    document.getElementById("overlay").style.background="red";
+    document.getElementById("icon").style.animation="Initial";
+    document.getElementById("icon").style.transform="scaleY(-1)";
+    document.getElementById("overlayContent").append("Something went wrong: " + error);
+}
+
+/*
   Sends the form data to the server and updates the user interface based on the result.
 */
 async function sendData() {
@@ -155,7 +165,14 @@ async function sendData() {
 	const response = await fetch("/search_treebanks", {
 	    method: "POST",
 	    body: formData,
-	}).then((response) => response.json());
+	})
+	.then((response) => {
+	    if (!response.ok) {
+		throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
+	    }
+	    return response.json()
+	})
+	.catch((error) => handleFetchError(error));
 	// Update the page with the results
 	document.getElementById("hitsSpan").textContent = response.l1.length + " hits";
 	var downloadsSpan = document.getElementById("downloadsSpan");
