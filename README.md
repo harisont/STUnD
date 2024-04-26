@@ -4,18 +4,11 @@ A prototype GUI Search Tool for (bilingual) parallel Universal Dependencies tree
 ---
 
 ## Installing STUnD
-1. download the binary:
-   - [Linux and hopefully MacOS](https://github.com/harisont/STUnD/releases/download/v0/stund-gui) (only tested on Manjaro)
-   - [Windows](https://github.com/harisont/STUnD/releases/download/v0/stund-gui.exe) (only tested on Windows 10)
-2. create a shortcut to start the GUI in one click:
-   - on Linux, copy [the desktop file](stund.desktop) wherever you have your desktop files (`~/.local/share/applications/` maybe?)
-   - on MacOS, I have no idea
-   - on Windows, create a Desktop shortcut to [stund.ps1](stund.ps1), right click on it and make it executable on click by setting `Properties > Target` to `powershell.exe -ExecutionPolicy Bypass -File "WHATEVER-PATH-WAS-ALREADY-THERE"` (mind the quotes!)
 
-As an alternative, you can also try...
+You can either compile and run STUnD directly on your (Linux) computer using [the Haskell Tool Stack](https://docs.haskellstack.org/en/stable/) or build and run it inside a [Docker](https://www.docker.com/) container.
 
-## Compiling from source
-By far the simplest way to compile STUnD is with [the Haskell Tool Stack](https://docs.haskellstack.org/en/stable/). If you do have Stack, running  
+### Compile using Stack
+If you do have Stack, you can run  
 
 ```
 stack build
