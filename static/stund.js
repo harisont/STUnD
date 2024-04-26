@@ -188,10 +188,11 @@ async function sendData() {
     removeErrorMessages();
     resetAllErrors();
     var error = false;
-    var l2treebank = document.getElementById("l2treebank").value;
-    if (l2treebank == "") {
-	markError(document.getElementById("l2span"));
-	addErrorMessage("L2 treebank is required");
+    // Check if the required treebank is present
+    var l1treebank = document.getElementById("l1treebank").value;
+    if (l1treebank == "") {
+	markError(document.getElementById("l1span"));
+	addErrorMessage("L1 treebank is required");
 	error = true;
     }
     var queryElement = document.getElementById("query");
