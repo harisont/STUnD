@@ -2,6 +2,7 @@ version: "3.8"
 services:
   stund-gui:
     build: .
+    image: sbx/stund
     command: ["stack","run","stund-gui"]
     ports:
      - "3000:3000"
