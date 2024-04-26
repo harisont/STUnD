@@ -5,7 +5,7 @@
   <link rel="stylesheet" href="stund.css" />
   <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
 </head>
-<body>
+<body onload="pageLoad()">
   <script src="/static/stund.js"></script>
   <form id="searchForm" enctype="multipart/form-data" class="unselectable">
     <div width="100%">
@@ -31,7 +31,9 @@
         <label for="query">Query</label>
       </span>
       <span>
-        <input id="query" name="query" type="text" placeholder="L1-L2 or single-language (matched on T2) query" style="width: 100%"></input>
+        <input  autocomplete="off" id="query" name="query" type="search" placeholder="L1-L2 or single-language (matched on T2) query" style="width: 100%" list="queries"/>
+	<datalist id="queries">
+	</datalist>
       </span>
     </div>
     <div width="100%" class="pattern">

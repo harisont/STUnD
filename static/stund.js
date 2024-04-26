@@ -1,6 +1,14 @@
 "use strict";
 
 /*
+  Function to be called when the page is loaded
+*/
+function pageLoad() {
+    // Load saved queries from local storage
+    loadQueries();
+}
+
+/*
   Removes all children from an element
 */
 function removeChildren(element) {
@@ -134,6 +142,45 @@ function handleFetchError(error) {
 }
 
 /*
+  Stores the query in the local storage
+*/
+function saveQuery() {
+    // Get queries from local storage
+    var queries = JSON.parse(localStorage.savedQueries);
+    var query = document.getElementById("query").value;
+    // Add if not yet in the list
+    if (!queries.find((q) => query === q)) {
+	queries.unshift(query)
+	// Also add to query list
+	var option = document.createElement("option");
+	option.value=query;
+	document.getElementById("queries").prepend(option);
+    }
+    // Store in local storage again
+    localStorage.savedQueries = JSON.stringify(queries);
+
+}
+
+/*
+  Load saved queries from local storage
+*/
+function loadQueries() {
+    // Load queries from storage and add to list
+    if (localStorage.savedQueries) {
+	var queriesList = document.getElementById("queries");
+	for (const query of JSON.parse(localStorage.savedQueries)) {
+	    var tmpOption = document.createElement("option");
+	    tmpOption.value=query;
+	    queriesList.append(tmpOption);
+	}
+    }
+    // Otherwise initialize storage
+    else {
+	localStorage.savedQueries = JSON.stringify([]);
+    }
+}
+
+/*
   Sends the form data to the server and updates the user interface based on the result.
 */
 async function sendData() {
@@ -162,6 +209,8 @@ async function sendData() {
 	error = error || !result	
     }
     if (!error) {
+	// Store the query in the local storage and list of queries
+	saveQuery();
 	// Get the form data
 	var formData = new FormData(document.getElementById("searchForm"));
 	// Show overlay
