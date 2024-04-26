@@ -29,7 +29,20 @@ stack install
 
 which also installs the executable, should be all that is needed enough. On Windows, however, you might encounter problems related to curl, STUnD's only external dependency. If that's the case, see [this](win.md).
 
+Afterwards you can run STUnD using either `stack run` or run the installed executable directly.
+
+### Run using Docker
+
+If you want to use Docker containers, the simplest way is to use `docker compose`. To build and run the image you can simply type:
+
+```
+docker compose up stund-gui
+```
+
+This will take a while for the first time because the image has to be built. Afterwards, running the container can be started directly with the same command.
+
 ## Using STUnD
+
 When you launch STUnD, a new tab will be opened in your browser.
 You should see something like this:
 
