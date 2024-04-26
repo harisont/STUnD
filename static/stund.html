@@ -14,7 +14,7 @@
           <label for="l1treebank">Treebank 1</label>
         </span>
         <span id="l1span">
-          <input id="l1treebank" name="l1treebank" type="file" accept=".conll, .conllu"></input>
+          <input id="l1treebank" name="l1treebank" type="file" accept=".conll, .conllu" />
         </span>
       </span>
       <span class="treebank">
@@ -22,7 +22,7 @@
           <label for="l2treebank">Treebank 2 (optional)</label>
         </span>
         <span id="l2span">
-          <input id="l2treebank" name="l2treebank" type="file" accept=".conll, .conllu"></input>
+          <input id="l2treebank" name="l2treebank" type="file" accept=".conll, .conllu" />
         </span>
       </span>
     </div>
@@ -39,7 +39,7 @@
         <label for="replacement">Replacement</label>
       </span>
       <span>
-        <input id="replacement" name="replacement" type="text" placeholder="additional replacement rule (optional)" style="width: 100%"></input>
+        <input id="replacement" name="replacement" type="search" placeholder="additional replacement rule (optional)" style="width: 100%" />
       </span>
     </div>
     <div id="modebar" >
@@ -47,9 +47,12 @@
         <label for="mode">Mode</label>
       </span>
       <span>
-        <input type="radio" id="textMode" name="mode" value="TextMode" checked>Text</input>
-        <input type="radio" id="conllMode" name="mode" value="CoNNLUMode">CoNLL-U</input>
-        <input type="radio" id="treeMode" name="mode" value="TreeMode">tree</input>
+        <input type="radio" id="textMode" name="mode" value="TextMode" checked />
+	<label for="textMode">Text</label>
+        <input type="radio" id="conllMode" name="mode" value="CoNNLUMode" />
+	<label for="conllMode">CoNLL-U</label>
+        <input type="radio" id="treeMode" name="mode" value="TreeMode" />
+	<label for="treeMode">Trees</label>
       </span>
       <input type="hidden" id="l1file" name="l1file" />
       <input type="hidden" id="l2file" name="l2file" />
