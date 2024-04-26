@@ -12,5 +12,6 @@ COPY . /app
 WORKDIR /app
 RUN stack build
 
+ENV LC_ALL=C.UTF-8
 EXPOSE 3000
 CMD ["stack", "run", "stund-gui"]
