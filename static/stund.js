@@ -5,7 +5,9 @@
 */
 function pageLoad() {
     // Load saved queries from local storage
-    loadQueries();
+    loadFromStore("queries");
+    // Load saved queries from local storage
+    loadFromStore("replacements");
 }
 
 /*
@@ -144,39 +146,44 @@ function handleFetchError(error) {
 /*
   Stores the query in the local storage
 */
-function saveQuery() {
+function saveToStore(category, value) {
     // Get queries from local storage
-    var queries = JSON.parse(localStorage.savedQueries);
-    var query = document.getElementById("query").value;
+    var lists = JSON.parse(localStorage.savedLists);
+    // Initialize new list if category is missing
+    if (!(category in lists)) {
+	lists[category]= []
+    }
     // Add if not yet in the list
-    if (!queries.find((q) => query === q)) {
-	queries.unshift(query)
+    if (!lists[category].find((q) => value === q)) {
+	lists[category].unshift(value)
 	// Also add to query list
 	var option = document.createElement("option");
-	option.value=query;
-	document.getElementById("queries").prepend(option);
+	option.value=value;
+	document.getElementById(category).prepend(option);
     }
     // Store in local storage again
-    localStorage.savedQueries = JSON.stringify(queries);
-
+    localStorage.savedLists = JSON.stringify(lists);
 }
 
 /*
-  Load saved queries from local storage
+  Load stored lists from local storage
 */
-function loadQueries() {
+function loadFromStore(category) {
     // Load queries from storage and add to list
-    if (localStorage.savedQueries) {
-	var queriesList = document.getElementById("queries");
-	for (const query of JSON.parse(localStorage.savedQueries)) {
-	    var tmpOption = document.createElement("option");
-	    tmpOption.value=query;
-	    queriesList.append(tmpOption);
+    if (localStorage.savedLists) {
+	var lists = JSON.parse(localStorage.savedLists)
+	if (category in lists) {
+	    var listElement = document.getElementById(category);
+	    for (const opt of lists[category]) {
+		var tmpOption = document.createElement("option");
+		tmpOption.value=opt;
+		listElement.append(tmpOption);
+	    }
 	}
     }
     // Otherwise initialize storage
     else {
-	localStorage.savedQueries = JSON.stringify([]);
+	localStorage.savedLists = JSON.stringify({});
     }
 }
 
@@ -211,7 +218,10 @@ async function sendData() {
     }
     if (!error) {
 	// Store the query in the local storage and list of queries
-	saveQuery();
+	saveToStore("queries", document.getElementById("query").value);
+	let replacement = document.getElementById("replacement").value;
+	if (replacement != "")
+	    saveToStore("replacements", replacement);
 	// Get the form data
 	var formData = new FormData(document.getElementById("searchForm"));
 	// Show overlay
