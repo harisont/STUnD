@@ -196,6 +196,7 @@ function handleReturnKey(e) {
 	sendData();
     }
 }
+
 /*
   Sends the form data to the server and updates the user interface based on the result.
 */
@@ -253,9 +254,9 @@ async function sendData() {
 	// Cleanup old download links
 	removeChildren(downloadsSpan);
 	// Add new download links
-    var saveSpan = document.createElement("span")
-    saveSpan.textContent = "- save: "
-    downloadsSpan.append(saveSpan)
+	var saveSpan = document.createElement("span")
+	saveSpan.textContent = "- save: "
+	downloadsSpan.append(saveSpan)
 	downloadsSpan.append(createTmpLink(response.l1file, "T1 file"));
 	downloadsSpan.append(createTmpLink(response.l2file, "T2 file"));
 	downloadsSpan.append(createTmpLink(response.l1l2file, "parallel file"));
