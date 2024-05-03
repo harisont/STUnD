@@ -96,11 +96,11 @@ checkReplacement =
   do
     replacementTxt <- queryParam "replacement"
     -- fieldVals is defined in UDConcepts
-    let replacement =  readMaybe replacementTxt
+    let replacement =  readMaybe replacementTxt :: Maybe UDReplacement
     if isNothing replacement then
       json (Status "invalid" "could not parse replacement" Nothing)
     else
-      json (Status "valid" "" replacement)
+      json (Status "valid" "" (Just [show $ fromJust replacement]))
 
 searchTreebanks :: ActionM ()
 searchTreebanks =
