@@ -126,9 +126,10 @@ searchTreebanks =
     let mreplacement = if null replacementTxt
                        then Just $ CHANGES []
                        else readMaybe replacementTxt
-    -- Convert to sentences. If the L1 treebank is empty use a copy of the L2 treebank
-    let l1Sents = if (not . null . T.unpack) l1Text then prsUDText $ T.unpack l1Text else prsUDText $ T.unpack l2Text
-    let l2Sents = prsUDText $ T.unpack l2Text
+    -- Convert to sentences
+    let l1Sents = prsUDText $ T.unpack l1Text
+    -- If the L2 treebank is empty use a copy of the L1 treebank (temporary)
+    let l2Sents = if (not . null . T.unpack) l2Text then prsUDText $ T.unpack l2Text else prsUDText $ T.unpack l1Text
     -- Align sentences
     let treebank = l1Sents `zip` l2Sents
     let alignments = map align treebank
