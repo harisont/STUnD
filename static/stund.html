@@ -31,7 +31,7 @@
         <label for="query">Query</label>
       </span>
       <span>
-        <input  autocomplete="off" id="query" name="query" type="search" placeholder="L1-L2 or single-language (matched on T2) query" style="width: 100%" list="queries"/>
+        <input  autocomplete="off" id="query" name="query" type="search" placeholder="L1-L2 or single-language (matched on T2) query" style="width: 100%" list="queries" onkeyup=" handleReturnKey(event)"/>
 	<datalist id="queries">
 	</datalist>
       </span>
@@ -41,7 +41,7 @@
         <label for="replacement">Replacement</label>
       </span>
       <span>
-        <input id="replacement" name="replacement" type="search" placeholder="additional replacement rule (optional)" style="width: 100%" list="replacements" />
+        <input id="replacement" name="replacement" type="search" placeholder="additional replacement rule (optional)" style="width: 100%" list="replacements" onkeyup=" handleReturnKey(event)"/>
 	<datalist id="replacements">
 	</datalist>
       </span>

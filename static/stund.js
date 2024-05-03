@@ -187,6 +187,15 @@ function loadFromStore(category) {
     }
 }
 
+
+/*
+  Send form on press of the return key
+*/
+function handleReturnKey(e) {
+    if(e && e.keyCode == 13) {
+	sendData();
+    }
+}
 /*
   Sends the form data to the server and updates the user interface based on the result.
 */
