@@ -8,7 +8,7 @@ extra-deps:
 - github: harisont/concept-alignment
   commit: 21b27c727ed69b8212a4fc017a68ea3305525e15 # l2-ud branch
 - github: harisont/L2-UD
-  commit: c8d743bc8eba66bae17deae0b4f626bf87fde809 # 2l-ud branch
+  commit: 9b9b61a89e672bb457ada2612ec78aa0a61fe667 # 2l-ud branch
 - github: harisont/hs-md
   commit: 62e5e955709c332bcc8043678a116fbb38ab455b
 - github: harisont/deptreehs

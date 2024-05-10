@@ -16,12 +16,12 @@ import Data.List.Utils
 import Text.PrettyPrint (render)
 import UDStandard
 import UDTrees
-import UDPatterns hiding (matchingSubtrees)
+import UDPatterns
 import UDVisualizations
 import Utils.UDConcepts
 import Utils.Output
 import Align
-import Match
+import Match hiding (matchingSubtrees)
 import Errors
 
 import Data.Text.Lazy (Text)
@@ -53,9 +53,9 @@ data ParseStatus = Status {
 data AlignmentResult = Result {
   l1 :: [String],
   l2 :: [String],
-  l1file :: String,
-  l2file :: String,
-  l1l2file :: String
+  l1file :: Maybe String,
+  l2file :: Maybe String,
+  l1l2file :: Maybe String
   } deriving (Generic, Show)
 
 instance ToJSON ParseStatus
@@ -128,25 +128,28 @@ searchTreebanks =
                        else readMaybe replacementTxt
     -- Convert to sentences
     let l1Sents = prsUDText $ T.unpack l1Text
-    -- If the L2 treebank is empty use a copy of the L1 treebank (temporary)
-    let l2Sents = if (not . null . T.unpack) l2Text then prsUDText $ T.unpack l2Text else prsUDText $ T.unpack l1Text
+    -- If the L2 treebank is empty, fill with dummy sentences
+    -- (better than using the L1 treebank again, because alignment complexity
+    -- will be negligible if the trees are empty) 
+    let l2Sents = if (not . null . T.unpack) l2Text 
+                    then prsUDText $ T.unpack l2Text 
+                    else repeat (tree2sentence dummyUDTree)
     -- Align sentences
     let treebank = l1Sents `zip` l2Sents
     let alignments = map align treebank
     -- true bilingual matches
     let bimatches = treebank `zip` map (match patterns) alignments
     -- all matches (add L2-only with dummy alignments)
-    let matches =
-          map
-            (\bms@((s1,s2),ms) ->
-               let pattern = patterns !! 0
-               in
-                 if isL2only $ pattern
-                 then ((s1,s2), ms ++ ((repeat $ dummyUDTree) `zip` filter
-                                       (\t -> not $ t `elem` (map snd ms))
-                                        (matchingSubtrees (snd $ (pattern)) (sentence2tree s2))))
-                 else bms)
-            bimatches
+    let matches = map
+          (\bms@((s1,s2),ms) ->
+             let pattern = patterns !! 0
+             in if isMonolingual pattern
+                  then ((s1,s2), ms ++ zip (filter 
+                    (\t -> not $ t `elem` (map fst ms))
+                    (matchingSubtrees (fst $ (pattern)) (sentence2tree s1)))
+                      (repeat $ dummyUDTree))
+                else bms)
+          bimatches
     let matches' =
           map
             (\(s,es) ->
@@ -178,7 +181,19 @@ searchTreebanks =
         ((map rmBold l1Col) `zip` (map rmBold l2Col))
     l1Tmpfile <- liftIO $ writeMaybeTempFile l1file "l1-.htm" $ unlines l1Col
     l2Tmpfile <- liftIO $ writeMaybeTempFile l2file "l2-.htm" $ unlines l2Col
-    json $ Result { l1 = l1Col, l2 = l2Col, l1file = l1Tmpfile, l2file = l2Tmpfile, l1l2file = l1l2Tmpfile }
+    json $ if (not . null . T.unpack) l2Text  
+      then Result { -- parallel treebank
+        l1 = l1Col, 
+        l2 = l2Col, 
+        l1file = Just l1Tmpfile, 
+        l2file = Just l2Tmpfile, 
+        l1l2file = Just l1l2Tmpfile }
+      else Result { -- single treebank
+        l1 = l1Col,
+        l2 = [],
+        l1file = Just l1Tmpfile,
+        l2file = Nothing,
+        l1l2file = Nothing }
       where
         rmBold s = replace "</b>" "" (replace "<b>" "" s)
         -- Writes the content either to a given file if it exists or to a new temporary file otherwise
