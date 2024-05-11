@@ -52,17 +52,25 @@
       </span>
       <span>
         <input type="radio" id="textMode" name="mode" value="TextMode" checked />
-	<label for="textMode">Text</label>
+	      <label for="textMode">text</label>
         <input type="radio" id="conllMode" name="mode" value="CoNNLUMode" />
-	<label for="conllMode">CoNLL-U</label>
+	      <label for="conllMode">CoNLL-U</label>
         <input type="radio" id="treeMode" name="mode" value="TreeMode" />
-	<label for="treeMode">Trees</label>
+	      <label for="treeMode">tree</label>
       </span>
+      &nbsp;
+      <span>
+        <input type="checkbox" id="diff" name="diff" value="True" />
+        <label for="diff">highlight discrepancies</label>
+      </span>
+      &nbsp;
       <input type="hidden" id="l1file" name="l1file" />
       <input type="hidden" id="l2file" name="l2file" />
       <input type="hidden" id="l1l2file" name="l1l2file" />
-      <input type="button" value="search" onclick="sendData()" />
-      <input type="reset" value="reset" />
+      <span>
+        <input type="button" value="search" onclick="sendData()" />
+        <input type="reset" value="reset" />
+      </span>
     </div>
   </form>
   <div id="errorDiv" class="unselectable"></div>

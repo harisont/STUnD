@@ -107,9 +107,9 @@ searchTreebanks =
   do
     -- Get a map of all uploaded files from filename to file info
     formFiles <- M.fromList <$> files
-    -- Get tehe file mode
+    -- Get the file mode
     mode <- read <$> formParam "mode"
-
+    diff <- fromMaybe False <$> fmap read <$> formParamMaybe "diff"
     l1file <- maybeTmpFile <$> formParamMaybe "l1file"
     liftIO $ putStrLn $ show l1file
     l2file <- maybeTmpFile <$> formParamMaybe "l2file"
@@ -165,15 +165,18 @@ searchTreebanks =
                             then tree2sentence m1
                             else tree2sentence (subtree2tree m1)
                           m2' = tree2sentence (subtree2tree m2)
-                      in ((case mode of
+                          mark content = 
+                            if diff && m1 /= m2 
+                              then "<mark>" ++ content ++ "</mark>"
+                              else content
+                      in ((mark (case mode of
                               TextMode -> highlin s1 (tree2sentence m1) HTML
                               CoNNLUMode -> (prt m1') ++ "\n"
-                              TreeMode -> sentence2svgFragment $ m1',
-                           case mode of
+                              TreeMode -> sentence2svgFragment $ m1'),
+                          mark (case mode of
                              TextMode -> highlin s2 (tree2sentence m2) HTML
                              CoNNLUMode -> (prt m2') ++ "\n"
-                             TreeMode -> sentence2svgFragment $ m2')
-                         ))
+                             TreeMode -> sentence2svgFragment $ m2')))) 
                   ms)
             matches'
     l1l2Tmpfile <- liftIO $ writeMaybeTempFile l1l2file "l1-l2-.tsv" $ unlines $ map

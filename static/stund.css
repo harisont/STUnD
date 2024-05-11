@@ -81,3 +81,7 @@ body {
     padding-top: 0.15%;
     padding-bottom: 0.15%;
 }
+
+mark {
+    background: #FFD567
+}
