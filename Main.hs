@@ -166,7 +166,7 @@ searchTreebanks =
                             else tree2sentence (subtree2tree m1)
                           m2' = tree2sentence (subtree2tree m2)
                           mark content = 
-                            if diff && m1 /= m2 
+                            if diff && m1 /= m2 && isJust l2file
                               then "<mark>" ++ content ++ "</mark>"
                               else content
                       in ((mark (case mode of
