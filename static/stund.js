@@ -65,7 +65,7 @@ function resetAllErrors() {
  */
 async function checkQuery(queryElement) {
     var error = false;
-    await fetch("/check_query?query=" + queryElement.value)
+    await fetch("../check_query?query=" + queryElement.value)
 	.then((response) => response.json())
 	.then((data) => {
 	    if (data.status != "valid") {
@@ -84,7 +84,7 @@ async function checkQuery(queryElement) {
  */
 async function checkReplacement(replacementElement) {
     var error = false;
-    await fetch("/check_replacement?replacement=" + replacementElement.value)
+    await fetch("../check_replacement?replacement=" + replacementElement.value)
 	.then((response) => response.json())
 	.then((data) => {
 	    if (data.status != "valid") {
@@ -103,7 +103,7 @@ async function checkReplacement(replacementElement) {
 */
 function createTmpLink(file, text) {
     var link = document.createElement("a");
-    link.href = "/tmp_file?filename=" + file;
+    link.href = "../tmp_file?filename=" + file;
     link.text = text;
     link.target = "_blank";
     link.classList = "tmpLink";
@@ -242,7 +242,7 @@ async function sendData() {
 	// Show overlay
 	showOverlay();
 	// Send the request. Because we "await" the fetch, this will block
-	const response = await fetch("/search_treebanks", {
+	const response = await fetch("../search_treebanks", {
 	    method: "POST",
 	    body: formData,
 	})

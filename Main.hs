@@ -78,7 +78,7 @@ handleRoot :: ActionM ()
 handleRoot =
   do
     liftIO $ putStrLn "Redirecting"
-    redirect "/static/stund.html"
+    redirect "static/stund.html"
 
 checkQuery :: ActionM ()
 checkQuery =
