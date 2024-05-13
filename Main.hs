@@ -251,6 +251,7 @@ main =
         -- Handles static files
         middleware static
         get "/" $ handleRoot
+        get "/index.html" $ handleRoot
         get "/check_query" $ checkQuery
         get "/check_replacement" $ checkReplacement
         post "/search_treebanks" $ searchTreebanks
