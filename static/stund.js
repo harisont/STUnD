@@ -121,11 +121,16 @@ function createLine(leftField,rightField) {
 	rightSpan = document.createElement("span");
     lineDiv.classList.add("resultRow")
     leftSpan.classList.add("resultCell")
-    rightSpan.classList.add("resultCell")
     leftSpan.innerHTML=leftField;
-    rightSpan.innerHTML=rightField;
     lineDiv.append(leftSpan);
-    lineDiv.append(rightSpan);
+    if (rightField != undefined) {
+	rightSpan.classList.add("resultCell")
+	rightSpan.innerHTML=rightField;
+	lineDiv.append(rightSpan);
+    }
+    else {
+	leftSpan.style["width"]="98%";
+    }
     return lineDiv;
 }
 
@@ -253,13 +258,20 @@ async function sendData() {
 	var downloadsSpan = document.getElementById("downloadsSpan");
 	// Cleanup old download links
 	removeChildren(downloadsSpan);
-	// Add new download links
+	// Add new download links and store the file names for later reuse in hidden fields of the form
 	var saveSpan = document.createElement("span")
 	saveSpan.textContent = "- save: "
 	downloadsSpan.append(saveSpan)
 	downloadsSpan.append(createTmpLink(response.l1file, "T1 file"));
-	downloadsSpan.append(createTmpLink(response.l2file, "T2 file"));
-	downloadsSpan.append(createTmpLink(response.l1l2file, "parallel file"));
+	document.getElementById("l1file").value = response.l1file;
+	if (response.l2file != null) {
+	    downloadsSpan.append(createTmpLink(response.l2file, "T2 file"));
+	    document.getElementById("l2file").value = response.l2file;
+	}
+	if (response.l1l2file != null) {
+	    downloadsSpan.append(createTmpLink(response.l1l2file, "parallel file"));
+	    document.getElementById("l1l2file").value = response.l1l2file;
+	}
 	var resultsDiv = document.getElementById("resultsDiv");
 	// Cleanup old results
 	removeChildren(resultsDiv);
@@ -270,10 +282,6 @@ async function sendData() {
 	else {
 	    resultsDiv.style.fontFamily="inherit";
 	}
-	// Store the filenames in the hidden fields of the form
-	document.getElementById("l1file").value = response.l1file;
-	document.getElementById("l2file").value = response.l2file;
-	document.getElementById("l1l2file").value = response.l1l2file;
 	// Display all the results
 	for (var index = 0; index < response.l1.length; index++) {
 	    resultsDiv.append(createLine(response.l1[index],response.l2[index]));
