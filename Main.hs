@@ -95,7 +95,6 @@ checkReplacement :: ActionM ()
 checkReplacement =
   do
     replacementTxt <- queryParam "replacement"
-    -- fieldVals is defined in UDConcepts
     let replacement =  readMaybe replacementTxt :: Maybe UDReplacement
     if isNothing replacement then
       json (Status "invalid" "could not parse replacement" Nothing)
