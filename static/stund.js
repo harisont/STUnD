@@ -97,6 +97,38 @@ async function checkReplacement(replacementElement) {
 }
 
 /*
+  Checks if the conll file is valid and adds error message and highlights culprit
+
+  Returns false in case of an error and true otherwise
+ */
+async function checkConll(treebankElement,checkedTreebankElement) {
+    var error = false;
+    if (checkedTreebankElement.value=="false") {
+	var formData = new FormData();
+	formData.set(treebankElement.id,treebankElement.files[0]);
+	await fetch("../check_conll", {
+	    method: "POST",
+	    body: formData,
+	})
+	.then((response) => response.json())
+	.then((data) => {
+	    if (data.status != "valid") {
+		markError(treebankElement);
+		addErrorMessage("Problem with treebank file: " + data.msg);
+		for (error of data.parsesOrErrors) {
+		    addErrorMessage(error);
+		}
+		error= true;
+	    }
+	    else {
+		checkedTreebankElement.value="true";
+	    }
+	});
+    }
+    return !error;
+}
+
+/*
   Creates the link to a temporary file.
 
   Returns a new <a> element
@@ -206,29 +238,39 @@ function handleReturnKey(e) {
   Sends the form data to the server and updates the user interface based on the result.
 */
 async function sendData() {
+    // Show overlay
+    showOverlay();
     // Remove all previous errors
     removeErrorMessages();
     resetAllErrors();
     var error = false;
     // Check if the required treebank is present
-    var l1treebank = document.getElementById("l1treebank").value;
-    if (l1treebank == "") {
+    var l1treebank = document.getElementById("l1treebank");
+    if (l1treebank.value == "") {
 	markError(document.getElementById("l1span"));
 	addErrorMessage("L1 treebank is required");
 	error = true;
     }
+    // Check the Conll files
+    var result = await checkConll(l1treebank,document.getElementById("checkedL1Treebank"));
+    error = error || !result;
+    var l2treebank = document.getElementById("l2treebank");
+    if (l2treebank.value != "") {
+	var result = await checkConll(l2treebank,document.getElementById("checkedL2Treebank"));
+	error = error || !result
+    }
+    // Checks the query
     var queryElement = document.getElementById("query");
     // Replace empty query by the default value
     if (queryElement.value == "") {
 	queryElement.value="DEPREL_ \"root\"";
     }
-    // Checks the query
-    var result = await checkQuery(queryElement);
+    var result = await checkQuery(queryElement, document.getElementById("parsedQuery"));
     error = error || !result
+    // Checks the replacement
     var replacementElement = document.getElementById("replacement");
     if (replacementElement.value != "") {
-	// Get the 
-	var result = await checkReplacement(replacementElement)
+	var result = await checkReplacement(replacementElement,document.getElementById("parsedReplacement"))
 	error = error || !result	
     }
     if (!error) {
@@ -239,8 +281,9 @@ async function sendData() {
 	    saveToStore("replacements", replacement);
 	// Get the form data
 	var formData = new FormData(document.getElementById("searchForm"));
-	// Show overlay
-	showOverlay();
+	// Remove unused data before sending it
+	formData.delete("checkedL1Treebank");
+	formData.delete("checkedL2Treebank");
 	// Send the request. Because we "await" the fetch, this will block
 	const response = await fetch("../search_treebanks", {
 	    method: "POST",
@@ -286,9 +329,9 @@ async function sendData() {
 	for (var index = 0; index < response.l1.length; index++) {
 	    resultsDiv.append(createLine(response.l1[index],response.l2[index]));
 	}
-	// Hide the overlay when we are done
-	hideOverlay();
     }
+    // Hide the overlay when we are done
+    hideOverlay();
 }
 
 /*

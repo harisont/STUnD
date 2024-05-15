@@ -14,7 +14,7 @@
           <label for="l1treebank">Treebank 1</label>
         </span>
         <span id="l1span">
-          <input id="l1treebank" name="l1treebank" type="file" accept=".conll, .conllu" />
+          <input id="l1treebank" name="l1treebank" type="file" accept=".conll, .conllu" oninput="document.getElementById('checkedL1Treebank').value='false'" />
         </span>
       </span>
       <span class="treebank">
@@ -22,7 +22,7 @@
           <label for="l2treebank">Treebank 2 (optional)</label>
         </span>
         <span id="l2span">
-          <input id="l2treebank" name="l2treebank" type="file" accept=".conll, .conllu" />
+          <input id="l2treebank" name="l2treebank" type="file" accept=".conll, .conllu" oninput="document.getElementById('checkedL2Treebank').value='false'" />
         </span>
       </span>
     </div>
@@ -31,7 +31,7 @@
         <label for="query">Query</label>
       </span>
       <span>
-        <input  autocomplete="off" id="query" name="query" type="search" placeholder="L1-L2 or single-language (matched on T2) query" style="width: 100%" list="queries" onkeyup=" handleReturnKey(event)"/>
+        <input  autocomplete="off" id="query" name="query" type="search" placeholder="L1-L2 or single-language (matched on T2) query" style="width: 100%" list="queries" onkeyup="handleReturnKey(event)" />
 	<datalist id="queries">
 	</datalist>
       </span>
@@ -41,7 +41,7 @@
         <label for="replacement">Replacement</label>
       </span>
       <span>
-        <input id="replacement" name="replacement" type="search" placeholder="additional replacement rule (optional)" style="width: 100%" list="replacements" onkeyup=" handleReturnKey(event)"/>
+        <input id="replacement" name="replacement" type="search" placeholder="additional replacement rule (optional)" style="width: 100%" list="replacements" onkeyup="handleReturnKey(event)" />
 	<datalist id="replacements">
 	</datalist>
       </span>
@@ -64,6 +64,8 @@
         <label for="diff">highlight discrepancies</label>
       </span>
       &nbsp;
+      <input type="hidden" id="checkedL1Treebank" name="checkedL1Treebank" value="false" />
+      <input type="hidden" id="checkedL2Treebank" name="checkedL2Treebank" value="false" />
       <input type="hidden" id="l1file" name="l1file" />
       <input type="hidden" id="l2file" name="l2file" />
       <input type="hidden" id="l1l2file" name="l1l2file" />

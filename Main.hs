@@ -28,6 +28,7 @@ import Data.Text.Lazy (Text)
 import qualified Data.Text.Lazy as T
 import qualified Data.Map as M
 import qualified Data.List as L
+import Data.Either
 import Web.Scotty
 import qualified Web.Scotty as S
 import Network.Wai.Middleware.RequestLogger
@@ -108,6 +109,17 @@ checkReplacement =
       json (Status "invalid" "could not parse replacement" Nothing)
     else
       json (Status "valid" "" (Just [show $ fromJust replacement]))
+
+-- Check the validity of a CONLL file
+checkConll :: ActionM ()
+checkConll =
+  do
+    -- Use chkNprsUDText to get possible errors in the file
+    results <- map (chkNprsUDText . T.unpack . decodeUtf8 . fileContent . snd) <$> files
+    if (all isLeft results) then
+      json (Status "valid" "" (Just $ map show $ lefts results))
+    else
+      json (Status "invalid" "could not parse CONLL" $ Just $ map concat $ rights results)
 
 -- Search the treebank(s) using the query and replacement parameters
 searchTreebanks :: ActionM ()
@@ -264,5 +276,6 @@ main =
         get "/index.html" $ handleRoot
         get "/check_query" $ checkQuery
         get "/check_replacement" $ checkReplacement
+        post "/check_conll" $ checkConll
         post "/search_treebanks" $ searchTreebanks
         get "/tmp_file/" $ downloadTmpFile
