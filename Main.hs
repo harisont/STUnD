@@ -201,9 +201,9 @@ searchTreebanks =
             matches'
     l1l2Tmpfile <- liftIO $ writeMaybeTempFile l1l2file "l1-l2-.tsv" $ unlines $ map
         (\(l1,l2) -> l1 ++ "\t" ++ l2)
-        ((map rmBold l1Col) `zip` (map rmBold l2Col))
-    l1Tmpfile <- liftIO $ writeMaybeTempFile l1file "l1-.htm" $ unlines l1Col
-    l2Tmpfile <- liftIO $ writeMaybeTempFile l2file "l2-.htm" $ unlines l2Col
+        ((map rmMarkup l1Col) `zip` (map rmMarkup l2Col))
+    l1Tmpfile <- liftIO $ writeMaybeTempFile l1file "l1-.htm" $ case mode of { TextMode -> rmMarkup $ unlines l1Col ; _ -> unlines l1Col }
+    l2Tmpfile <- liftIO $ writeMaybeTempFile l2file "l2-.htm" $  case mode of { TextMode -> rmMarkup $ unlines l2Col ; _ -> unlines l2Col }
     json $ if (not . null . T.unpack) l2Text  
       then Result { -- parallel treebank
         l1 = l1Col, 
@@ -218,7 +218,7 @@ searchTreebanks =
         l2file = Nothing,
         l1l2file = Nothing }
       where
-        rmBold s = replace "</b>" "" (replace "<b>" "" s)
+        rmMarkup s = replace "</mark>" "" $ replace "<mark>" "" $ replace "</b>" "" $ replace "<b>" "" s
         -- Writes the content either to a given file if it exists or to a new temporary file otherwise
         writeMaybeTempFile :: Maybe FilePath -> String -> String -> IO FilePath
         writeMaybeTempFile maybeFile tmpFilePattern content =
