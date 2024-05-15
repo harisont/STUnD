@@ -44,11 +44,14 @@ import Debug.Trace
 
 data Mode = TextMode | CoNNLUMode | TreeMode deriving (Eq, Read, Show, Enum)
 
+-- Result of the check_* API endpoints
 data ParseStatus = Status {
   status :: Text, -- valid or invalid
   msg :: Text, -- usually empty when valid
+  parsesOrErrors :: Maybe [String]
   } deriving (Generic, Show)
 
+-- Result of the search_treebank endpoint
 data AlignmentResult = Result {
   l1 :: [String],
   l2 :: [String],
@@ -57,6 +60,7 @@ data AlignmentResult = Result {
   l1l2file :: Maybe String
   } deriving (Generic, Show)
 
+-- Both can be serialized to JSON
 instance ToJSON ParseStatus
 instance ToJSON AlignmentResult
 
@@ -65,6 +69,7 @@ instance ToJSON AlignmentResult
 tmpPath :: String
 tmpPath = "tmp"
 
+-- Debug flag and debug method in the ActionM monad
 debugOn = False
 debug :: String -> String -> ActionM ()
 debug msg var =
@@ -72,10 +77,12 @@ debug msg var =
     liftIO $ putStrLn $ msg ++ "::\n" ++ var
   else
     return ()
-    
+
+-- Handler for the landing page
 handleRoot :: ActionM ()
 handleRoot =
   do
+    -- Redirect to the stund web interface
     liftIO $ putStrLn "Redirecting"
     redirect "static/stund.html"
 
@@ -102,6 +109,7 @@ checkReplacement =
     else
       json (Status "valid" "" (Just [show $ fromJust replacement]))
 
+-- Search the treebank(s) using the query and replacement parameters
 searchTreebanks :: ActionM ()
 searchTreebanks =
   do
@@ -221,6 +229,7 @@ searchTreebanks =
           (fst $ replacementsWithUDPattern r e1,
            fst $ replacementsWithUDPattern r e2)
 
+-- Downloads a temp file
 downloadTmpFile :: ActionM ()
 downloadTmpFile =
   do
@@ -232,6 +241,7 @@ downloadTmpFile =
     else
       S.status $ mkStatus 403 "Access denied"
 
+-- Main method for the server
 main :: IO ()
 main =
   do
