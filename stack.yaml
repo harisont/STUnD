@@ -12,7 +12,7 @@ extra-deps:
 - github: harisont/hs-md
   commit: 62e5e955709c332bcc8043678a116fbb38ab455b
 - github: harisont/deptreehs
-  commit: 33db8d3f08c0c09979901b12232eab95b4dfc38d
+  commit: 3c02e11fcd83c5731e9f3cd5ba75eabd160f2f5e
 - scotty-0.22@sha256:12365f7867e50368db053b0f3aac96a0bdaace0ff2058cb4a8f17fc10fcea6f7,6022
 - wai-extra-3.1.14@sha256:1b093366842dc0057cebb4a23dbf9a29269321d70fd242c7695ce0bbd80d32fb,8056
 - wai-3.2.4@sha256:e14fde953183f9db8c10da79b44a2b24d241c1203426c5636995069e2dacb1fe,1776
