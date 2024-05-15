@@ -8,6 +8,7 @@ body {
 
 .errorMsg {
     background-color: #FF7E7E;
+    white-space: preserve;
 }
 
 .tmpLink {
