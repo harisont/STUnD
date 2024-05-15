@@ -45,9 +45,8 @@ import Debug.Trace
 data Mode = TextMode | CoNNLUMode | TreeMode deriving (Eq, Read, Show, Enum)
 
 data ParseStatus = Status {
-  status :: Text,
-  msg :: Text,
-  patterns :: Maybe [String]
+  status :: Text, -- valid or invalid
+  msg :: Text, -- usually empty when valid
   } deriving (Generic, Show)
 
 data AlignmentResult = Result {
@@ -80,6 +79,7 @@ handleRoot =
     liftIO $ putStrLn "Redirecting"
     redirect "static/stund.html"
 
+-- Check the validity of the query expression
 checkQuery :: ActionM ()
 checkQuery =
   do
@@ -91,6 +91,7 @@ checkQuery =
     else
       json (Status "valid" "" (Just $ map show patterns))
 
+-- Check the validity of the replacement expression
 checkReplacement :: ActionM ()
 checkReplacement =
   do
