@@ -119,7 +119,7 @@ checkConll =
     if (all isLeft results) then
       json (Status "valid" "" (Just $ map show $ lefts results))
     else
-      json (Status "invalid" "could not parse CONLL" $ Just $ map concat $ rights results)
+      json (Status "invalid" "could not parse CONLL" $ Just $ concat $ rights results)
 
 -- Search the treebank(s) using the query and replacement parameters
 searchTreebanks :: ActionM ()
