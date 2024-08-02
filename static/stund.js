@@ -329,9 +329,17 @@ async function sendData() {
 	// Set font depending on mode
 	if (document.getElementById("conllMode").checked) {
 	    resultsDiv.style.fontFamily="monospace,monospace";
+	    // Show the "editable" checkbox
+	    document.getElementById("t1editableSpan").style.setProperty("display", "inline-block");
+	    if (!(response.t2[0] == undefined)) {
+		document.getElementById("t2editableSpan").style.setProperty("display", "inline-block");
+	    }
 	}
 	else {
 	    resultsDiv.style.fontFamily="inherit";
+	    // Hide "editable" checkboxes
+	    document.getElementById("t1editableSpan").style.setProperty("display", "none");
+	    document.getElementById("t2editableSpan").style.setProperty("display", "none");
 	}
 	// Display all the results
 	for (var index = 0; index < response.t1.length; index++) {
