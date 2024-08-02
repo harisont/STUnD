@@ -11,18 +11,18 @@
     <div width="100%">
       <span class="treebank">
         <span>
-          <label for="l1treebank">Treebank 1</label>
+          <label for="treebank1">Treebank 1</label>
         </span>
-        <span id="l1span">
-          <input id="l1treebank" name="l1treebank" type="file" accept=".conll, .conllu" oninput="document.getElementById('checkedL1Treebank').value='false'" />
+        <span id="t1span">
+          <input id="treebank1" name="treebank1" type="file" accept=".conll, .conllu" oninput="document.getElementById('checkedTreebank1').value='false'" />
         </span>
       </span>
       <span class="treebank">
         <span>
-          <label for="l2treebank">Treebank 2 (optional)</label>
+          <label for="treebank2">Treebank 2 (optional)</label>
         </span>
-        <span id="l2span">
-          <input id="l2treebank" name="l2treebank" type="file" accept=".conll, .conllu" oninput="document.getElementById('checkedL2Treebank').value='false'" />
+        <span id="t2span">
+          <input id="treebank2" name="treebank2" type="file" accept=".conll, .conllu" oninput="document.getElementById('checkedTreebank2').value='false'" />
         </span>
       </span>
     </div>
@@ -31,7 +31,7 @@
         <label for="query">Query</label>
       </span>
       <span>
-        <input  autocomplete="off" id="query" name="query" type="search" placeholder="L1-L2 or single-language (matched on T2) query" style="width: 100%" list="queries" onkeyup="handleReturnKey(event)" />
+        <input  autocomplete="off" id="query" name="query" type="search" placeholder="T1-T2 or single-language (matched on T1) query" style="width: 100%" list="queries" onkeyup="handleReturnKey(event)" />
 	<datalist id="queries">
 	</datalist>
       </span>
@@ -64,11 +64,11 @@
         <label for="diff">highlight discrepancies</label>
       </span>
       &nbsp;
-      <input type="hidden" id="checkedL1Treebank" name="checkedL1Treebank" value="false" />
-      <input type="hidden" id="checkedL2Treebank" name="checkedL2Treebank" value="false" />
-      <input type="hidden" id="l1file" name="l1file" />
-      <input type="hidden" id="l2file" name="l2file" />
-      <input type="hidden" id="l1l2file" name="l1l2file" />
+      <input type="hidden" id="checkedTreebank1" name="checkedTreebank1" value="false" />
+      <input type="hidden" id="checkedTreebank2" name="checkedTreebank2" value="false" />
+      <input type="hidden" id="t1file" name="t1file" />
+      <input type="hidden" id="t2file" name="t2file" />
+      <input type="hidden" id="t1t2file" name="t1t2file" />
       <span>
         <input type="button" value="search" onclick="sendData()" />
         <input type="reset" value="reset" />

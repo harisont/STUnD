@@ -245,10 +245,10 @@ async function sendData() {
     resetAllErrors();
     var error = false;
     // Check if the required treebank is present
-    var l1treebank = document.getElementById("l1treebank");
-    if (l1treebank.value == "") {
-	markError(document.getElementById("l1span"));
-	addErrorMessage("L1 treebank is required");
+    var treebank1 = document.getElementById("treebank1");
+    if (treebank1.value == "") {
+	markError(document.getElementById("t1span"));
+	addErrorMessage("Treebank 1 is required");
 	error = true;
     }
     // Check the Conll files
@@ -282,8 +282,8 @@ async function sendData() {
 	// Get the form data
 	var formData = new FormData(document.getElementById("searchForm"));
 	// Remove unused data before sending it
-	formData.delete("checkedL1Treebank");
-	formData.delete("checkedL2Treebank");
+	formData.delete("checkedTreebank1");
+	formData.delete("checkedTreebank2");
 	// Send the request. Because we "await" the fetch, this will block
 	const response = await fetch("../search_treebanks", {
 	    method: "POST",
@@ -297,7 +297,7 @@ async function sendData() {
 	})
 	.catch((error) => handleFetchError(error));
 	// Update the page with the results
-	document.getElementById("hitsSpan").textContent = response.l1.length + " hits";
+	document.getElementById("hitsSpan").textContent = response.t1.length + " hits";
 	var downloadsSpan = document.getElementById("downloadsSpan");
 	// Cleanup old download links
 	removeChildren(downloadsSpan);
@@ -305,15 +305,15 @@ async function sendData() {
 	var saveSpan = document.createElement("span")
 	saveSpan.textContent = "- save: "
 	downloadsSpan.append(saveSpan)
-	downloadsSpan.append(createTmpLink(response.l1file, "T1 file"));
-	document.getElementById("l1file").value = response.l1file;
-	if (response.l2file != null) {
-	    downloadsSpan.append(createTmpLink(response.l2file, "T2 file"));
-	    document.getElementById("l2file").value = response.l2file;
+	downloadsSpan.append(createTmpLink(response.t1file, "T1 file"));
+	document.getElementById("t1file").value = response.t1file;
+	if (response.t2file != null) {
+	    downloadsSpan.append(createTmpLink(response.t2file, "T2 file"));
+	    document.getElementById("t2file").value = response.t2file;
 	}
-	if (response.l1l2file != null) {
-	    downloadsSpan.append(createTmpLink(response.l1l2file, "parallel file"));
-	    document.getElementById("l1l2file").value = response.l1l2file;
+	if (response.t1t2file != null) {
+	    downloadsSpan.append(createTmpLink(response.t1t2file, "parallel file"));
+	    document.getElementById("t1t2file").value = response.t1t2file;
 	}
 	var resultsDiv = document.getElementById("resultsDiv");
 	// Cleanup old results
@@ -326,8 +326,8 @@ async function sendData() {
 	    resultsDiv.style.fontFamily="inherit";
 	}
 	// Display all the results
-	for (var index = 0; index < response.l1.length; index++) {
-	    resultsDiv.append(createLine(response.l1[index],response.l2[index]));
+	for (var index = 0; index < response.t1.length; index++) {
+	    resultsDiv.append(createLine(response.t1[index],response.t2[index]));
 	}
     }
     // Hide the overlay when we are done

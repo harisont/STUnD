@@ -54,11 +54,11 @@ data ParseStatus = Status {
 
 -- Result of the search_treebank endpoint
 data AlignmentResult = Result {
-  l1 :: [String],
-  l2 :: [String],
-  l1file :: Maybe String,
-  l2file :: Maybe String,
-  l1l2file :: Maybe String
+  t1 :: [String],
+  t2 :: [String],
+  t1file :: Maybe String,
+  t2file :: Maybe String,
+  t1t2file :: Maybe String
   } deriving (Generic, Show)
 
 -- Both can be serialized to JSON
@@ -130,13 +130,13 @@ searchTreebanks =
     -- Get the file mode
     mode <- read <$> formParam "mode"
     diff <- fromMaybe False <$> fmap read <$> formParamMaybe "diff"
-    l1file <- maybeTmpFile <$> formParamMaybe "l1file"
-    liftIO $ putStrLn $ show l1file
-    l2file <- maybeTmpFile <$> formParamMaybe "l2file"
-    l1l2file <- maybeTmpFile <$> formParamMaybe "l1l2file"
+    t1file <- maybeTmpFile <$> formParamMaybe "t1file"
+    liftIO $ putStrLn $ show t1file
+    t2file <- maybeTmpFile <$> formParamMaybe "t2file"
+    t1t2file <- maybeTmpFile <$> formParamMaybe "t1t2file"
     -- Get text for both files
-    let l1Text = decodeUtf8 $ fileContent $ formFiles M.! "l1treebank"
-    let l2Text = decodeUtf8 $ fileContent $ formFiles M.! "l2treebank"
+    let t1Text = decodeUtf8 $ fileContent $ formFiles M.! "treebank1"
+    let t2Text = decodeUtf8 $ fileContent $ formFiles M.! "treebank2"
     -- Get pattern and replacement
     queryTxt <- formParam "query"
     replacementTxt <- formParam "replacement"
@@ -147,19 +147,19 @@ searchTreebanks =
                        then Just $ CHANGES []
                        else readMaybe replacementTxt
     -- Convert to sentences
-    let l1Sents = prsUDText $ T.unpack l1Text
-    -- If the L2 treebank is empty, fill with dummy sentences
-    -- (better than using the L1 treebank again, because alignment complexity
+    let t1Sents = prsUDText $ T.unpack t1Text
+    -- If the treebank 2 is empty, fill with dummy sentences
+    -- (better than using the treebank 1 again, because alignment complexity
     -- will be negligible if the trees are empty) 
-    let l2Sents = if (not . null . T.unpack) l2Text 
-                    then prsUDText $ T.unpack l2Text 
+    let t2Sents = if (not . null . T.unpack) t2Text 
+                    then prsUDText $ T.unpack t2Text 
                     else repeat (tree2sentence dummyUDTree)
     -- Align sentences
-    let treebank = l1Sents `zip` l2Sents
+    let treebank = t1Sents `zip` t2Sents
     let alignments = map align treebank
     -- true bilingual matches
     let bimatches = treebank `zip` map (match patterns) alignments
-    -- all matches (add L2-only with dummy alignments)
+    -- all matches (add treebank 1-only with dummy alignments)
     let matches = map
           (\bms@((s1,s2),ms) ->
              let pattern = patterns !! 0
@@ -175,7 +175,7 @@ searchTreebanks =
             (\(s,es) ->
                (s,map (applyReplacement (fromJust $ mreplacement)) es))
             (filter (\(_,ms) -> not $ null ms) matches)
-    let (l1Col,l2Col) =
+    let (t1Col,t2Col) =
           unzip $ concatMap
             (\((s1,s2),ms) ->
                 map
@@ -186,7 +186,7 @@ searchTreebanks =
                             else tree2sentence (subtree2tree m1)
                           m2' = tree2sentence (subtree2tree m2)
                           mark content = 
-                            if diff && m1 /= m2 && isJust l2file
+                            if diff && m1 /= m2 && isJust t2file
                               then "<mark>" ++ content ++ "</mark>"
                               else content
                       in ((mark (case mode of
@@ -199,24 +199,24 @@ searchTreebanks =
                              TreeMode -> sentence2svgFragment $ m2')))) 
                   ms)
             matches'
-    l1l2Tmpfile <- liftIO $ writeMaybeTempFile l1l2file "l1-l2-.tsv" $ unlines $ map
-        (\(l1,l2) -> l1 ++ "\t" ++ l2)
-        ((map rmMarkup l1Col) `zip` (map rmMarkup l2Col))
-    l1Tmpfile <- liftIO $ writeMaybeTempFile l1file "l1-.htm" $ case mode of { TextMode -> rmMarkup $ unlines l1Col ; _ -> unlines l1Col }
-    l2Tmpfile <- liftIO $ writeMaybeTempFile l2file "l2-.htm" $  case mode of { TextMode -> rmMarkup $ unlines l2Col ; _ -> unlines l2Col }
-    json $ if (not . null . T.unpack) l2Text  
+    t1t2Tmpfile <- liftIO $ writeMaybeTempFile t1t2file "t1-t2-.tsv" $ unlines $ map
+        (\(t1,t2) -> t1 ++ "\t" ++ t2)
+        ((map rmMarkup t1Col) `zip` (map rmMarkup t2Col))
+    t1Tmpfile <- liftIO $ writeMaybeTempFile t1file "t1-.htm" $ case mode of { TextMode -> rmMarkup $ unlines t1Col ; _ -> unlines t1Col }
+    t2Tmpfile <- liftIO $ writeMaybeTempFile t2file "t2-.htm" $ case mode of { TextMode -> rmMarkup $ unlines t2Col ; _ -> unlines t2Col }
+    json $ if (not . null . T.unpack) t2Text  
       then Result { -- parallel treebank
-        l1 = l1Col, 
-        l2 = l2Col, 
-        l1file = Just l1Tmpfile, 
-        l2file = Just l2Tmpfile, 
-        l1l2file = Just l1l2Tmpfile }
+        t1 = t1Col, 
+        t2 = t2Col, 
+        t1file = Just t1Tmpfile, 
+        t2file = Just t2Tmpfile, 
+        t1t2file = Just t1t2Tmpfile }
       else Result { -- single treebank
-        l1 = l1Col,
-        l2 = [],
-        l1file = Just l1Tmpfile,
-        l2file = Nothing,
-        l1l2file = Nothing }
+        t1 = t1Col,
+        t2 = [],
+        t1file = Just t1Tmpfile,
+        t2file = Nothing,
+        t1t2file = Nothing }
       where
         rmMarkup s = replace "</mark>" "" $ replace "<mark>" "" $ replace "</b>" "" $ replace "<b>" "" s
         -- Writes the content either to a given file if it exists or to a new temporary file otherwise
