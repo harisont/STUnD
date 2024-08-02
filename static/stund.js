@@ -153,10 +153,12 @@ function createLine(leftField,rightField) {
 	rightSpan = document.createElement("span");
     lineDiv.classList.add("resultRow")
     leftSpan.classList.add("resultCell")
+    leftSpan.classList.add("t1resultCell")
     leftSpan.innerHTML=leftField;
     lineDiv.append(leftSpan);
     if (rightField != undefined) {
 	rightSpan.classList.add("resultCell")
+	rightSpan.classList.add("t2resultCell")
 	rightSpan.innerHTML=rightField;
 	lineDiv.append(rightSpan);
     }
