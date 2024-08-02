@@ -11,10 +11,10 @@ function pageLoad() {
 }
 
 /*
-  Removes all children from an element
+  Removes all children from an element matching a filter criterion
 */
-function removeChildren(element) {
-    Array.from(element.children).map((c) => c.remove());
+function removeChildren(element, filterCriterion = ((e) => true)) {
+	Array.from(element.children).filter(filterCriterion).map((c) => c.remove());
 }
 
 /*
@@ -325,7 +325,7 @@ async function sendData() {
 	}
 	var resultsDiv = document.getElementById("resultsDiv");
 	// Cleanup old results
-	removeChildren(resultsDiv);
+	removeChildren(resultsDiv, ((e) => e.getAttribute("class") == "resultRow"));
 	// Set font depending on mode
 	if (document.getElementById("conllMode").checked) {
 	    resultsDiv.style.fontFamily="monospace,monospace";
