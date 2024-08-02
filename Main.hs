@@ -121,6 +121,12 @@ checkConll =
     else
       json (Status "invalid" "input is not in valid CoNLL-U format" $ Just $ concat $ rights results)
 
+-- Parse an uploaded plain text file to CONLL using UDPipe API
+parsePlaintext :: ActionM ()
+parsePlaintext =
+  do
+    text "Not implemented yet"
+    
 -- Search the treebank(s) using the query and replacement parameters
 searchTreebanks :: ActionM ()
 searchTreebanks =
@@ -277,5 +283,6 @@ main =
         get "/check_query" $ checkQuery
         get "/check_replacement" $ checkReplacement
         post "/check_conll" $ checkConll
+        post "/parse_plaintext" $ parsePlaintext
         post "/search_treebanks" $ searchTreebanks
         get "/tmp_file/" $ downloadTmpFile

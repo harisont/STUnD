@@ -251,13 +251,19 @@ async function sendData() {
 	addErrorMessage("Treebank 1 is required");
 	error = true;
     }
-    // Check the Conll files
-    var result = await checkConll(l1treebank,document.getElementById("checkedL1Treebank"));
-    error = error || !result;
-    var l2treebank = document.getElementById("l2treebank");
-    if (l2treebank.value != "") {
-	var result = await checkConll(l2treebank,document.getElementById("checkedL2Treebank"));
-	error = error || !result
+    // Also get the second treebank
+    var treebank2 = document.getElementById("l2treebank");
+    if (treebank1.value.endsWith(".txt") || (treebank2 != null && treebank2.value.endsWith(".txt"))) {
+	// TODO parse to CONLL
+    }
+    else {
+	// Check the Conll files
+	var result = await checkConll(treebank1,document.getElementById("checkedTreebank1"));
+	error = error || !result;
+	if (treebank2 != null && treebank2.value != "") {
+	    var result = await checkConll(treebank2,document.getElementById("checkedTreebank2"));
+	    error = error || !result
+	}
     }
     // Checks the query
     var queryElement = document.getElementById("query");
