@@ -273,6 +273,13 @@ function handleReturnKey(e) {
   Sends the form data to the server and updates the user interface based on the result.
 */
 async function sendData() {
+    // Get edited flags
+    var isEdited = document.getElementById("editedTreebank1").value == "true" || document.getElementById("editedTreebank1").value == "true";
+    if (isEdited) {
+	if (!window.confirm("The data has been modified. The changes will be discarded if you continue now. Are you sure?")) {
+	    return;
+	}
+    }
     // Show overlay
     showOverlay();
     // Remove all previous errors
