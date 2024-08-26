@@ -59,6 +59,39 @@ function resetAllErrors() {
 }
 
 /*
+  Makes all fields in a CONLL treebank editable an manage button stuff
+*/
+function makeEditable(treebank) {
+    var checkbox = document.getElementById("t" + treebank + "editableBox");
+    // Check if we are in an editing state
+    if (checkbox.checked) {
+	// Update all result cells
+	for (const e of Array.from(document.getElementsByClassName("t" + treebank + "resultCell"))) {
+	    // Enable editing by adding the contenteditable attribute	    
+	    e.setAttribute("contenteditable","");
+	    e.setAttribute("oninput","editedTreebank('" + treebank + "')");
+	}
+    }
+    else {
+	// Update all result cells
+	for (const e of Array.from(document.getElementsByClassName("t" + treebank + "resultCell"))) {
+	    // Disable editing by removing the contenteditable attribute again
+	    e.removeAttribute("contenteditable")
+	}
+    }
+}
+
+/*
+  To be called when a treebank is edited
+*/
+function editedTreebank(treebank) {
+    // Enable resubmit
+    document.getElementById("t" + treebank + "resubmit").removeAttribute("disabled");
+    // Set the edited flag
+    document.getElementById("editedTreebank" + treebank).value="true";
+}
+
+/*
   Checks if the query string is valid and adds error message and highlights culprit
 
   Returns false in case of an error and true otherwise
