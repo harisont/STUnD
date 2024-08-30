@@ -92,10 +92,10 @@ decreases the depth of trees rooted in a verb to 0, eliminating all dependents:
 The more complex pattern
 
 ```haskell
-CHANGES [FILTER_SUBTREES (OR [UPOS "VERB", DEPREL_ "root", DEPREL_ "csubj", DEPREL_ "ccomp", DEPREL_ "xcomp", DEPREL_ "advcl", DEPREL_ "acl"]) (OR [DEPREL_ "aux", DEPREL_ "cop"]), PRUNE (DEPREL_ "aux") 0, PRUNE (DEPREL_ "cop") 0]
+CHANGES [FILTER_SUBTREES TRUE (OR [DEPREL_ "aux", DEPREL_ "cop"]), PRUNE TRUE 1]
 ```
 
-uses dependency labels to isolate verb constructions of maximum depth 2, thus producing, in conjunction with the first query, the following output:
+uses dependency labels to isolate verb constructions of maximum depth 1, thus producing, in conjunction with the first query, the following output:
 
 ![replacement rule](img/replacement2.png)
 
