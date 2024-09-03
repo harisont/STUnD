@@ -272,7 +272,7 @@ function handleReturnKey(e) {
 /*
   Sends the form data to the server and updates the user interface based on the result.
 */
-async function sendData() {
+async function sendFiles() {
     // Get edited flags
     var isEdited = document.getElementById("editedTreebank1").value == "true" || document.getElementById("editedTreebank1").value == "true";
     if (isEdited) {
@@ -280,6 +280,8 @@ async function sendData() {
 	    return;
 	}
     }
+async function resendEditedData() {
+}
     // Show overlay
     showOverlay();
     // Remove all previous errors

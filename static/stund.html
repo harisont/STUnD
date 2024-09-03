@@ -73,7 +73,7 @@
       <input type="hidden" id="t2file" name="t2file" />
       <input type="hidden" id="t1t2file" name="t1t2file" />
       <span>
-        <input type="button" value="search" onclick="sendData()" />
+        <input type="button" value="search" onclick="sendFiles()" />
         <input type="reset" value="reset" />
       </span>
     </div>
@@ -85,8 +85,8 @@
   </div>
   <div id="resultsDiv">
     <div id="resultsEditableDiv">
-    <span id="t1editableSpan" style="width: 49%; display: none; margin-top: 5px; margin-bottom: 5px;"><div><input type="checkbox" value="false" id="t1editableBox" onclick="makeEditable('1')" /> <label for="t1editableBox">editable</label></div><div><input type="button" id="t1resubmit" value="resubmit" onclick="resubmit()" disabled /></div></span>
-    <span id="t2editableSpan" style="width: 49%; display: none; margin-top: 5px; margin-bottom: 5px;"><div><input type="checkbox" value="false" id="t2editableBox" onclick="makeEditable('2')" /> <label for="t2editableBox">editable</label></div><div><input type="button" id="t2resubmit" value="resubmit" onclick="resubmit()" disabled /></div></span>
+    <span id="t1editableSpan" style="width: 49%; display: none; margin-top: 5px; margin-bottom: 5px;"><div><input type="checkbox" value="false" id="t1editableBox" onclick="makeEditable('1')" /> <label for="t1editableBox">editable</label></div><div><input type="button" id="t1resubmit" value="resubmit" onclick="resendEditedData()" disabled /></div></span>
+    <span id="t2editableSpan" style="width: 49%; display: none; margin-top: 5px; margin-bottom: 5px;"><div><input type="checkbox" value="false" id="t2editableBox" onclick="makeEditable('2')" /> <label for="t2editableBox">editable</label></div><div><input type="button" id="t2resubmit" value="resubmit" onclick="resendEditedData()" disabled /></div></span>
     
     </div>
   </div>
