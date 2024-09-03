@@ -89,6 +89,7 @@ function editedTreebank(treebank) {
     document.getElementById("t" + treebank + "resubmit").removeAttribute("disabled");
     // Set the edited flag
     document.getElementById("editedTreebank" + treebank).value="true";
+    document.getElementById("checkedTreebank" + treebank).value="false";
 }
 
 /*
@@ -131,14 +132,13 @@ async function checkReplacement(replacementElement) {
 
 /*
   Checks if the conll file is valid and adds error message and highlights culprit
-
-  Returns false in case of an error and true otherwise
+ false in case of an error and true otherwise
  */
-async function checkConll(treebankElement,checkedTreebankElement) {
+async function checkConll(treebankFile,checkedTreebankElement) {
     var error = false;
     if (checkedTreebankElement.value=="false") {
 	var formData = new FormData();
-	formData.set(treebankElement.id,treebankElement.files[0]);
+	formData.set(treebankFile.name,treebankFile);
 	await fetch("../check_conll", {
 	    method: "POST",
 	    body: formData,
@@ -146,8 +146,14 @@ async function checkConll(treebankElement,checkedTreebankElement) {
 	.then((response) => response.json())
 	.then((data) => {
 	    if (data.status != "valid") {
-		markError(treebankElement);
-		addErrorMessage("Problem with treebank file: " + data.msg);
+		// For both file input elements, find the one which caused the problem. It can only be either the one or the other.
+		if (document.getElementById("treebank1").value.endsWith(treebankFile.name)) {
+		    markError(document.getElementById("treebank1"))
+		}
+		else {
+		    markError(document.getElementById("treebank2"))
+		}
+		addErrorMessage("Problem with treebank file " + treebankFile.name + ": " + data.msg);
 		for (error of data.parsesOrErrors) {
 		    addErrorMessage(error);
 		}
@@ -270,44 +276,83 @@ function handleReturnKey(e) {
 }
 
 /*
-  Sends the form data to the server and updates the user interface based on the result.
+  Reset the edited flags and disable buttons
 */
+function resetEditable() {
+
+    document.getElementById("editedTreebank1").value == "false";
+    document.getElementById("editedTreebank2").value == "false";
+    document.getElementById("t1editableBox").checked = false;
+    document.getElementById("t2editableBox").checked = false;
+    document.getElementById("t1resubmit").setAttribute("disabled", "");
+    document.getElementById("t2resubmit").setAttribute("disabled", "");
+}
+
 async function sendFiles() {
+    var treebank1 = document.getElementById("treebank1");
     // Get edited flags
     var isEdited = document.getElementById("editedTreebank1").value == "true" || document.getElementById("editedTreebank1").value == "true";
     if (isEdited) {
 	if (!window.confirm("The data has been modified. The changes will be discarded if you continue now. Are you sure?")) {
+	    // Cancel on user input
 	    return;
 	}
     }
-async function resendEditedData() {
+    var treebank2 = document.getElementById("l2treebank");
+    // Also get the second treebank
+    if (treebank1.value.endsWith(".txt") || (treebank2 != null && treebank2.value.endsWith(".txt"))) {
+	parseAndSendFiles();
+    }
+    var formData = new FormData(document.getElementById("searchForm"));
+    queryData(formData);
+    resetEditable();
 }
+
+async function parseAndSendFiles() {
+    alert("Not implemented yet");
+}
+
+async function resendEditedData() {
+    var formData = new FormData(document.getElementById("searchForm"));
+    var newTreebank1 = []
+    var newTreebank2 = []
+    for (const e of Array.from(document.getElementsByClassName("t1resultCell"))) {
+	newTreebank1.push(e.textContent);
+    }
+    for (const e of Array.from(document.getElementsByClassName("t2resultCell"))) {
+	newTreebank2.push(e.textContent);
+    }
+    console.log(newTreebank1);
+    formData.delete("treebank1");
+    console.log(formData);
+    formData.set("treebank1", new File(newTreebank1,"treebank1tmp.conllu"))
+    formData.set("treebank2", new File(newTreebank2,"treebank2tmp.conllu"))
+    queryData(formData);
+    resetEditable();
+}
+
+/*
+  Sends the form data to the server and updates the user interface based on the result.
+*/
+async function queryData(formData) {
+    var error = false;
     // Show overlay
     showOverlay();
     // Remove all previous errors
     removeErrorMessages();
     resetAllErrors();
-    var error = false;
     // Check if the required treebank is present
-    var treebank1 = document.getElementById("treebank1");
-    if (treebank1.value == "") {
+    if (formData.get("treebank1").name == "") {
 	markError(document.getElementById("t1span"));
 	addErrorMessage("Treebank 1 is required");
 	error = true;
     }
-    // Also get the second treebank
-    var treebank2 = document.getElementById("l2treebank");
-    if (treebank1.value.endsWith(".txt") || (treebank2 != null && treebank2.value.endsWith(".txt"))) {
-	// TODO parse to CONLL
-    }
-    else {
-	// Check the Conll files
-	var result = await checkConll(treebank1,document.getElementById("checkedTreebank1"));
-	error = error || !result;
-	if (treebank2 != null && treebank2.value != "") {
-	    var result = await checkConll(treebank2,document.getElementById("checkedTreebank2"));
-	    error = error || !result
-	}
+    // Check the Conll files
+    var result = await checkConll(formData.get("treebank1"),document.getElementById("checkedTreebank1"));
+    error = error || !result;
+    if (formData.get("treebank2").name != "") {
+	var result = await checkConll(formData.get("treebank2"),document.getElementById("checkedTreebank2"));
+	error = error || !result
     }
     // Checks the query
     var queryElement = document.getElementById("query");
@@ -329,8 +374,6 @@ async function resendEditedData() {
 	let replacement = document.getElementById("replacement").value;
 	if (replacement != "")
 	    saveToStore("replacements", replacement);
-	// Get the form data
-	var formData = new FormData(document.getElementById("searchForm"));
 	// Remove unused data before sending it
 	formData.delete("checkedTreebank1");
 	formData.delete("checkedTreebank2");
