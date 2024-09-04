@@ -316,6 +316,7 @@ async function parseAndSendFiles() {
 
 async function resendEditedData() {
     var formData = new FormData(document.getElementById("searchForm"));
+    // Read the treebanks from the HTML table
     var newTreebank1 = []
     var newTreebank2 = []
     for (const e of Array.from(document.getElementsByClassName("t1resultCell"))) {
@@ -324,6 +325,7 @@ async function resendEditedData() {
     for (const e of Array.from(document.getElementsByClassName("t2resultCell"))) {
 	newTreebank2.push(e.textContent);
     }
+    // Update the treebanks
     formData.delete("treebank1");
     formData.set("treebank1", new File(newTreebank1,"treebank1tmp.conllu"))
     formData.delete("treebank2");
