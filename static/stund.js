@@ -310,52 +310,67 @@ async function sendFiles() {
     }
 }
 
+/*
+  Parse a single plaintext file into a treebank using UDPipe and identifies the language if necessary
+ */
+async function parsePlaintext(treebank) {
+    // Try to determine the language
+    var lang = "";
+    // name starts with XX_ where XX is a language code => we are done
+    if (treebank.name.match("^[a-z]{2}_")) {
+	lang = treebank.name.substr(0,2);
+    }
+    // We have to guess the language
+    else {
+	// Use langid.js (https://github.com/saffsd/langid.js) to identify the language
+	showOverlay("Identify language");
+	lang = langid.identify(await treebank.text());
+	hideOverlay();
+    }
+    // If we got a language we can use UDPipe for processing
+    if (lang != "") {
+	
+	// Set parameters for UDPipe
+	var udopipeData = new FormData();
+	udopipeData.set("model", lang);
+	udopipeData.set("tokenizer", "");
+	udopipeData.set("tagger", "");
+	udopipeData.set("parser", "");
+	udopipeData.set("data", await treebank.text());
+	showOverlay("Parse using UDPipe");
+	var treebankData = await fetch("https://lindat.mff.cuni.cz/services/udpipe/api/process", {
+	    method: "POST",
+	    body: udopipeData,
+	})
+	.then((data) => {
+	    return data.json();
+	});
+	hideOverlay();
+	console.log(treebankData);
+	return treebankData.result;
+    }
+}
+
+/*
+  Parse plaintext files into treebanks before submitting thems
+ */
 async function parseAndSendFiles() {
     var formData = new FormData(document.getElementById("searchForm"));
     var treebank1 = formData.get("treebank1");
+    var treebank2 = formData.get("treebank2");
+    var formData = new FormData(document.getElementById("searchForm"));
+    // Update the treebanks
     if (treebank1.name.endsWith("txt")) {
-	// Try to determine the language
-	var lang = "";
-	// name starts with XX_ where XX is a language code => we are done
-	if (treebank1.name.match("^[a-z]{2}_")) {
-	    lang = formData.get("treebank1").name.substr(0,2);
-	}
-	// We have to gess the language
-	else {
-	    // Use langid.js (https://github.com/saffsd/langid.js) to identify the language
-	    showOverlay("Identify language");
-	    lang = langid.identify(await treebank1.text());
-	    hideOverlay();
-	}
-	// If we got a language we can use UDPipe for processing
-	if (lang != "") {
-
-	    // Set parameters for UDPipe
-	    var udopipeData = new FormData();
-	    udopipeData.set("model", lang);
-	    udopipeData.set("tokenizer", "");
-	    udopipeData.set("tagger", "");
-	    udopipeData.set("parser", "");
-	    udopipeData.set("data", await treebank1.text());
-	    showOverlay("Parse using UDPipe");
-	    var treebankData = await fetch("https://lindat.mff.cuni.cz/services/udpipe/api/process", {
-		method: "POST",
-		body: udopipeData,
-	    })
-	    .then((data) => {
-		return data.json();
-	    });
-	    hideOverlay();
-	    var formData = new FormData(document.getElementById("searchForm"));
-	    // Update the treebanks
-	    formData.delete("treebank1");
-	    formData.set("treebank1", new File([treebankData.result],"treebank1tmp.conllu"))
-//	    formData.delete("treebank2");
-//	    formData.set("treebank2", new File(newTreebank2,"treebank2tmp.conllu"))
-	    queryData(formData);
-	} 
+	var treebankData = await parsePlaintext(treebank1);
+	formData.delete("treebank1"); 
+	formData.set("treebank1", new File([treebankData],"treebank1udpipe.conllu"))
     }
-    
+    if (treebank2.name.endsWith("txt")) {
+	var treebankData = await parsePlaintext(treebank2);
+	formData.delete("treebank2"); 
+	formData.set("treebank2", new File([treebankData],"treebank2udpipe.conllu"))
+    }
+    queryData(formData);
 }
 
 async function resendEditedData() {
