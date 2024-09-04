@@ -311,7 +311,46 @@ async function sendFiles() {
 }
 
 async function parseAndSendFiles() {
-    alert("Not implemented yet");
+    var formData = new FormData(document.getElementById("searchForm"));
+    var treebank1 = formData.get("treebank1");
+    if (treebank1.name.endsWith("txt")) {
+	// Try to determine the language
+	var lang = "";
+	// name starts with XX_ where XX is a language code => we are done
+	if (treebank1.name.match("^[a-z]{2}_")) {
+	    lang = formData.get("treebank1").name.substr(0,2);
+	}
+	// We have to gess the language
+	else {
+	    var lang = "en" // TODO language recognizer
+	}
+	// If we got a language we can use UDPipe for processing
+	if (lang != "") {
+
+	    // Set parameters for UDPipe
+	    var udopipeData = new FormData();
+	    udopipeData.set("model", lang);
+	    udopipeData.set("tokenizer", "");
+	    udopipeData.set("tagger", "");
+	    udopipeData.set("parser", "");
+	    udopipeData.set("data", await treebank1.text());
+	    var treebankData = await fetch("https://lindat.mff.cuni.cz/services/udpipe/api/process", {
+		method: "POST",
+		body: udopipeData,
+	    })
+	    .then((data) => {
+		return data.json();
+	    });
+	    var formData = new FormData(document.getElementById("searchForm"));
+	    // Update the treebanks
+	    formData.delete("treebank1");
+	    formData.set("treebank1", new File([treebankData.result],"treebank1tmp.conllu"))
+//	    formData.delete("treebank2");
+//	    formData.set("treebank2", new File(newTreebank2,"treebank2tmp.conllu"))
+	    queryData(formData);
+	} 
+    }
+    
 }
 
 async function resendEditedData() {
