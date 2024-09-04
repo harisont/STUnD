@@ -324,9 +324,7 @@ async function resendEditedData() {
     for (const e of Array.from(document.getElementsByClassName("t2resultCell"))) {
 	newTreebank2.push(e.textContent);
     }
-    console.log(newTreebank1);
     formData.delete("treebank1");
-    console.log(formData);
     formData.set("treebank1", new File(newTreebank1,"treebank1tmp.conllu"))
     formData.delete("treebank2");
     formData.set("treebank2", new File(newTreebank2,"treebank2tmp.conllu"))
