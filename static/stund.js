@@ -328,6 +328,7 @@ async function resendEditedData() {
     formData.delete("treebank1");
     console.log(formData);
     formData.set("treebank1", new File(newTreebank1,"treebank1tmp.conllu"))
+    formData.delete("treebank2");
     formData.set("treebank2", new File(newTreebank2,"treebank2tmp.conllu"))
     queryData(formData);
     resetEditable();
