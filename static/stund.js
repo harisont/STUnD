@@ -322,7 +322,8 @@ async function parseAndSendFiles() {
 	}
 	// We have to gess the language
 	else {
-	    var lang = "en" // TODO language recognizer
+	    // Use langid.js (https://github.com/saffsd/langid.js) to identify the language
+	    lang = langid.identify(await treebank1.text());
 	}
 	// If we got a language we can use UDPipe for processing
 	if (lang != "") {
