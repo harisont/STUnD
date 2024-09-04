@@ -303,9 +303,11 @@ async function sendFiles() {
     if (treebank1.value.endsWith(".txt") || (treebank2 != null && treebank2.value.endsWith(".txt"))) {
 	parseAndSendFiles();
     }
-    var formData = new FormData(document.getElementById("searchForm"));
-    queryData(formData);
-    resetEditable();
+    else {
+	var formData = new FormData(document.getElementById("searchForm"));
+	queryData(formData);
+	resetEditable();
+    }
 }
 
 async function parseAndSendFiles() {
