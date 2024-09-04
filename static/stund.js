@@ -346,7 +346,6 @@ async function parsePlaintext(treebank) {
 	    return data.json();
 	});
 	hideOverlay();
-	console.log(treebankData);
 	return treebankData.result;
     }
 }
