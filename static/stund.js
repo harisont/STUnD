@@ -323,7 +323,9 @@ async function parseAndSendFiles() {
 	// We have to gess the language
 	else {
 	    // Use langid.js (https://github.com/saffsd/langid.js) to identify the language
+	    showOverlay("Identify language");
 	    lang = langid.identify(await treebank1.text());
+	    hideOverlay();
 	}
 	// If we got a language we can use UDPipe for processing
 	if (lang != "") {
@@ -335,6 +337,7 @@ async function parseAndSendFiles() {
 	    udopipeData.set("tagger", "");
 	    udopipeData.set("parser", "");
 	    udopipeData.set("data", await treebank1.text());
+	    showOverlay("Parse using UDPipe");
 	    var treebankData = await fetch("https://lindat.mff.cuni.cz/services/udpipe/api/process", {
 		method: "POST",
 		body: udopipeData,
@@ -342,6 +345,7 @@ async function parseAndSendFiles() {
 	    .then((data) => {
 		return data.json();
 	    });
+	    hideOverlay();
 	    var formData = new FormData(document.getElementById("searchForm"));
 	    // Update the treebanks
 	    formData.delete("treebank1");
@@ -380,7 +384,7 @@ async function resendEditedData() {
 async function queryData(formData) {
     var error = false;
     // Show overlay
-    showOverlay();
+    showOverlay("Analyze using STUnD backend");
     // Remove all previous errors
     removeErrorMessages();
     resetAllErrors();
@@ -481,8 +485,10 @@ async function queryData(formData) {
 /*
   Shows the overlay while the process in operation
 */
-function showOverlay() {
+function showOverlay(message) {
     document.getElementById("overlay").style.display = "block";
+    // Add a message to the overlay
+    document.getElementById("overlayMessage").append(new Text(message));
 }
 
 /*
@@ -490,4 +496,6 @@ function showOverlay() {
 */
 function hideOverlay() {
     document.getElementById("overlay").style.display = "none";
+    // Remove message
+    document.getElementById("overlayMessage").firstChild.remove();
 }
