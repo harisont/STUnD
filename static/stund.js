@@ -280,8 +280,8 @@ function handleReturnKey(e) {
 */
 function resetEditable() {
 
-    document.getElementById("editedTreebank1").value == "false";
-    document.getElementById("editedTreebank2").value == "false";
+    document.getElementById("editedTreebank1").value = "false";
+    document.getElementById("editedTreebank2").value = "false";
     document.getElementById("t1editableBox").checked = false;
     document.getElementById("t2editableBox").checked = false;
     document.getElementById("t1resubmit").setAttribute("disabled", "");
