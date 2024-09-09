@@ -1,0 +1,3 @@
+[submodule "langid"]
+    path = static/langid
+    url = https://github.com/saffsd/langid.js
