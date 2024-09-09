@@ -136,6 +136,8 @@ searchTreebanks =
     formFiles <- M.fromList <$> files
     -- Get the file mode
     mode <- read <$> formParam "mode"
+    -- By default show context aroud matches
+    showContext <- fromMaybe True <$> fmap read <$> formParamMaybe "showContext"
     diff <- fromMaybe False <$> fmap read <$> formParamMaybe "diff"
     t1file <- maybeTmpFile <$> formParamMaybe "t1file"
     liftIO $ putStrLn $ show t1file
