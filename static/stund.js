@@ -86,7 +86,7 @@ function makeEditable(treebank) {
 */
 function editedTreebank(treebank) {
     // Enable resubmit
-    document.getElementById("t" + treebank + "resubmit").removeAttribute("disabled");
+    document.getElementById("resubmit").removeAttribute("disabled");
     // Set the edited flag
     document.getElementById("editedTreebank" + treebank).value="true";
     document.getElementById("checkedTreebank" + treebank).value="false";
@@ -284,8 +284,7 @@ function resetEditable() {
     document.getElementById("editedTreebank2").value == "false";
     document.getElementById("t1editableBox").checked = false;
     document.getElementById("t2editableBox").checked = false;
-    document.getElementById("t1resubmit").setAttribute("disabled", "");
-    document.getElementById("t2resubmit").setAttribute("disabled", "");
+    document.getElementById("resubmit").setAttribute("disabled", "");
 }
 
 async function sendFiles() {
@@ -481,6 +480,7 @@ async function queryData(formData) {
 	if (document.getElementById("conllMode").checked) {
 	    resultsDiv.style.fontFamily="monospace,monospace";
 	    // Show the "editable" checkbox
+	    document.getElementById("resubmit").style.setProperty("display", "inline-block");
 	    document.getElementById("t1editableSpan").style.setProperty("display", "inline-block");
 	    if (!(response.t2[0] == undefined)) {
 		document.getElementById("t2editableSpan").style.setProperty("display", "inline-block");
@@ -488,7 +488,8 @@ async function queryData(formData) {
 	}
 	else {
 	    resultsDiv.style.fontFamily="inherit";
-	    // Hide "editable" checkboxes
+	    // Hide "editable" checkboxes and resubmit button
+	    document.getElementById("resubmit").style.setProperty("display", "none");
 	    document.getElementById("t1editableSpan").style.setProperty("display", "none");
 	    document.getElementById("t2editableSpan").style.setProperty("display", "none");
 	}
