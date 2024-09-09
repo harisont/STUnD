@@ -28,6 +28,7 @@ import Data.Text.Lazy (Text)
 import qualified Data.Text.Lazy as T
 import qualified Data.Map as M
 import qualified Data.List as L
+import Data.Char
 import Data.Either
 import Web.Scotty
 import qualified Web.Scotty as S
@@ -208,8 +209,8 @@ searchTreebanks =
     t1t2Tmpfile <- liftIO $ writeMaybeTempFile t1t2file "t1-t2-.tsv" $ unlines $ map
         (\(t1,t2) -> t1 ++ "\t" ++ t2)
         ((map rmMarkup t1Col) `zip` (map rmMarkup t2Col))
-    t1Tmpfile <- liftIO $ writeMaybeTempFile t1file "t1-.htm" $ case mode of { TextMode -> rmMarkup $ unlines t1Col ; _ -> unlines t1Col }
-    t2Tmpfile <- liftIO $ writeMaybeTempFile t2file "t2-.htm" $ case mode of { TextMode -> rmMarkup $ unlines t2Col ; _ -> unlines t2Col }
+    t1Tmpfile <- liftIO $ writeMaybeTempFile t1file "t1-.htm" $ case mode of { TextMode -> rmMarkup $ mkUpper $ unlines t1Col ; _ -> rmMarkup $ unlines t1Col }
+    t2Tmpfile <- liftIO $ writeMaybeTempFile t2file "t2-.htm" $ case mode of { TextMode -> rmMarkup $ mkUpper $ unlines t2Col ; _ -> rmMarkup $ unlines t2Col }
     json $ if (not . null . T.unpack) t2Text  
       then Result { -- parallel treebank
         t1 = t1Col, 
@@ -224,7 +225,17 @@ searchTreebanks =
         t2file = Nothing,
         t1t2file = Nothing }
       where
+        -- remove markup tags <b> and <mark>
         rmMarkup s = replace "</mark>" "" $ replace "<mark>" "" $ replace "</b>" "" $ replace "<b>" "" s
+        -- replace <b>text</b> markup by upppercase TEXT
+        mkUpper s
+          | L.isPrefixOf "<b>" s = mkUpper' $ drop 3 s
+          | null s = ""
+          | otherwise = head s:mkUpper (tail s)
+          where
+            mkUpper' s
+              | L.isPrefixOf "</b>" s = mkUpper $ drop 4 s
+              | otherwise = toUpper (head s):mkUpper' (tail s)
         -- Writes the content either to a given file if it exists or to a new temporary file otherwise
         writeMaybeTempFile :: Maybe FilePath -> String -> String -> IO FilePath
         writeMaybeTempFile maybeFile tmpFilePattern content =
