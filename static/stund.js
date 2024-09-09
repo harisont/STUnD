@@ -358,6 +358,11 @@ async function parseAndSendFiles() {
     var treebank1 = formData.get("treebank1");
     var treebank2 = formData.get("treebank2");
     var formData = new FormData(document.getElementById("searchForm"));
+    // Ask user before sending data to external service
+    if (!window.confirm("Your data will be sent to an external service for processing. Is that okay?")) {
+	// Cancel on user input
+	return;
+    }
     // Update the treebanks
     if (treebank1.name.endsWith("txt")) {
 	var treebankData = await parsePlaintext(treebank1);
