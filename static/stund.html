@@ -55,14 +55,17 @@
       </span>
       <span>
         <input type="radio" id="textMode" name="mode" value="TextMode" checked />
-	      <label for="textMode">text</label>
+	<label for="textMode">text</label>
         <input type="radio" id="conllMode" name="mode" value="CoNNLUMode" />
-	      <label for="conllMode">CoNLL-U</label>
+	<label for="conllMode">CoNLL-U</label>
         <input type="radio" id="treeMode" name="mode" value="TreeMode" />
-	      <label for="treeMode">tree</label>
+	<label for="treeMode">tree</label>
       </span>
-      &nbsp;
+    </div>
+    <div id="optionbar">
       <span>
+	<input type="checkbox" id="showContext" name="showContext" value="True" />
+        <label for="diff">show context</label>
         <input type="checkbox" id="diff" name="diff" value="True" />
         <label for="diff">show diff</label>
       </span>
@@ -74,6 +77,8 @@
       <input type="hidden" id="t1file" name="t1file" />
       <input type="hidden" id="t2file" name="t2file" />
       <input type="hidden" id="t1t2file" name="t1t2file" />
+    </div>
+    <div if="buttonbar">
       <span>
         <input type="button" value="search" onclick="sendFiles()" />
         <input type="reset" value="reset" />
