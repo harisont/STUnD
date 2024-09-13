@@ -114,8 +114,7 @@ checkReplacement =
 checkConll :: ActionM ()
 checkConll =
   do
-    -- Use chkNprsUDText to get possible errors in the file
-    results <- map (chkNprsUDText . T.unpack . decodeUtf8 . fileContent . snd) <$> files
+    results <- map (prsUDText . T.unpack . decodeUtf8 . fileContent . snd) <$> files
     if (all isLeft results) then
       json (Status "valid" "" (Just $ map show $ lefts results))
     else
@@ -159,9 +158,9 @@ searchTreebanks =
     -- will be negligible if the trees are empty) 
     let t2Sents = if (not . null . T.unpack) t2Text 
                     then prsUDText $ T.unpack t2Text 
-                    else repeat (tree2sentence dummyUDTree)
+                    else Left $ repeat (tree2sentence dummyUDTree)
     -- Align sentences
-    let treebank = t1Sents `zip` t2Sents
+    let treebank = (fromLeft [] t1Sents) `zip` (fromLeft [] t2Sents)
     let alignments = map align treebank
     -- true bilingual matches
     let bimatches = treebank `zip` map (match patterns) alignments
