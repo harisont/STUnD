@@ -98,7 +98,7 @@ mark {
     padding-bottom: 0.25%;
 }
 
-#modebar {
+#modebar, .align-left {
     text-align: left;
 }
 
@@ -106,6 +106,18 @@ mark {
     text-align: center;
 }
 
-#buttonbar {
+#buttonbar, .align-right {
     text-align: right;
+}
+
+.numdiv {
+    width: 5%;
+    display: inline-block;
+    font-size: smaller;
+    font-weight: lighter;
+}
+
+.txtdiv {
+    width: 95%;
+    display: inline-block;
 }

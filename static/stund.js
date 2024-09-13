@@ -186,19 +186,35 @@ function createTmpLink(file, text) {
 
   Returns a new <div> element
 */
-function createLine(leftField,rightField) {
+function createLine(n,leftField,rightField) {
     var lineDiv = document.createElement("div"),
 	leftSpan = document.createElement("span"),
 	rightSpan = document.createElement("span");
     lineDiv.classList.add("resultRow")
     leftSpan.classList.add("resultCell")
     leftSpan.classList.add("t1resultCell")
-    leftSpan.innerHTML=leftField;
+	var leftNumDiv = document.createElement("div"),
+	leftTxtDiv = document.createElement("div"),
+	rightNumDiv = document.createElement("div"),
+	rightTxtDiv = document.createElement("div");
+    leftNumDiv.classList.add("numdiv");
+    leftNumDiv.classList.add("align-left");
+    rightNumDiv.classList.add("numdiv");
+    rightNumDiv.classList.add("align-right");
+    leftTxtDiv.classList.add("txtdiv");
+    rightTxtDiv.classList.add("txtdiv");
+    leftSpan.appendChild(leftNumDiv);
+    leftSpan.appendChild(leftTxtDiv);
+    rightSpan.appendChild(rightTxtDiv);
+    rightSpan.appendChild(rightNumDiv);
+    leftNumDiv.innerHTML=n;
+    leftTxtDiv.innerHTML=leftField;
     lineDiv.append(leftSpan);
     if (rightField != undefined) {
 	rightSpan.classList.add("resultCell")
 	rightSpan.classList.add("t2resultCell")
-	rightSpan.innerHTML=rightField;
+	rightTxtDiv.innerHTML=rightField;
+    rightNumDiv.innerHTML=n;
 	lineDiv.append(rightSpan);
     }
     else {
@@ -496,7 +512,7 @@ async function queryData(formData) {
 	}
 	// Display all the results
 	for (var index = 0; index < response.t1.length; index++) {
-	    resultsDiv.append(createLine(response.t1[index],response.t2[index]));
+	    resultsDiv.append(createLine(index + 1, response.t1[index],response.t2[index]));
 	}
     }
     // Hide the overlay when we are done
