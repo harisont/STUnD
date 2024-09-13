@@ -482,8 +482,10 @@ async function queryData(formData) {
 	    resultsDiv.style.fontFamily="monospace,monospace";
 	    // Show the "editable" checkbox
 	    document.getElementById("t1editableSpan").style.setProperty("display", "inline-block");
+        document.getElementById("t1editableSpan").style.setProperty("font-family", "sans-serif");
 	    if (!(response.t2[0] == undefined)) {
 		document.getElementById("t2editableSpan").style.setProperty("display", "inline-block");
+        document.getElementById("t2editableSpan").style.setProperty("font-family", "sans-serif");
 	    }
 	}
 	else {
