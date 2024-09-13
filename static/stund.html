@@ -7,6 +7,8 @@
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
 </head>
 <body onload="pageLoad()">
+  <script src="langid/langid-model-full.js"></script>
+  <script src="langid/langid.js"></script>
   <script src="stund.js"></script>
   <form id="searchForm" enctype="multipart/form-data" class="unselectable">
     <div width="100%">
@@ -93,11 +95,13 @@
   <div id="overlay" class="unselectable">
     <div id="overlayContent">
       <center>
-        <i>...bara en stund...</i>
+        <i>...det kan ta en liten stund...</i>
         <br>
-        (just a moment) 
+        (this can take a moment) 
         <br><br>
         <img src="icon.png" id="icon" />
+	<br><br>
+	<div id="overlayMessage"></div>
       </center>
     </div>
   </div>

@@ -280,8 +280,8 @@ function handleReturnKey(e) {
 */
 function resetEditable() {
 
-    document.getElementById("editedTreebank1").value == "false";
-    document.getElementById("editedTreebank2").value == "false";
+    document.getElementById("editedTreebank1").value = "false";
+    document.getElementById("editedTreebank2").value = "false";
     document.getElementById("t1editableBox").checked = false;
     document.getElementById("t2editableBox").checked = false;
     document.getElementById("t1resubmit").setAttribute("disabled", "");
@@ -303,17 +303,83 @@ async function sendFiles() {
     if (treebank1.value.endsWith(".txt") || (treebank2 != null && treebank2.value.endsWith(".txt"))) {
 	parseAndSendFiles();
     }
-    var formData = new FormData(document.getElementById("searchForm"));
-    queryData(formData);
-    resetEditable();
+    else {
+	var formData = new FormData(document.getElementById("searchForm"));
+	queryData(formData);
+	resetEditable();
+    }
 }
 
+/*
+  Parse a single plaintext file into a treebank using UDPipe and identifies the language if necessary
+ */
+async function parsePlaintext(treebank) {
+    // Try to determine the language
+    var lang = "";
+    // name starts with XX_ where XX is a language code => we are done
+    if (treebank.name.match("^[a-z]{2}_")) {
+	lang = treebank.name.substr(0,2);
+    }
+    // We have to guess the language
+    else {
+	// Use langid.js (https://github.com/saffsd/langid.js) to identify the language
+	showOverlay("Identify language");
+	lang = langid.identify(await treebank.text());
+	hideOverlay();
+    }
+    // If we got a language we can use UDPipe for processing
+    if (lang != "") {
+	
+	// Set parameters for UDPipe
+	var udopipeData = new FormData();
+	udopipeData.set("model", lang);
+	udopipeData.set("tokenizer", "");
+	udopipeData.set("tagger", "");
+	udopipeData.set("parser", "");
+	udopipeData.set("data", await treebank.text());
+	showOverlay("Parse using UDPipe");
+	var treebankData = await fetch("https://lindat.mff.cuni.cz/services/udpipe/api/process", {
+	    method: "POST",
+	    body: udopipeData,
+	})
+	.then((data) => {
+	    return data.json();
+	});
+	hideOverlay();
+	return treebankData.result;
+    }
+}
+
+/*
+  Parse plaintext files into treebanks before submitting thems
+ */
 async function parseAndSendFiles() {
-    alert("Not implemented yet");
+    var formData = new FormData(document.getElementById("searchForm"));
+    var treebank1 = formData.get("treebank1");
+    var treebank2 = formData.get("treebank2");
+    var formData = new FormData(document.getElementById("searchForm"));
+    // Ask user before sending data to external service
+    if (!window.confirm("Your data will be sent to an external service for processing. Is that okay?")) {
+	// Cancel on user input
+	return;
+    }
+    // Update the treebanks
+    if (treebank1.name.endsWith("txt")) {
+	var treebankData = await parsePlaintext(treebank1);
+	formData.delete("treebank1"); 
+	formData.set("treebank1", new File([treebankData],"treebank1udpipe.conllu"))
+    }
+    if (treebank2.name.endsWith("txt")) {
+	var treebankData = await parsePlaintext(treebank2);
+	formData.delete("treebank2"); 
+	formData.set("treebank2", new File([treebankData],"treebank2udpipe.conllu"))
+    }
+    queryData(formData);
 }
 
 async function resendEditedData() {
     var formData = new FormData(document.getElementById("searchForm"));
+    // Read the treebanks from the HTML table
     var newTreebank1 = []
     var newTreebank2 = []
     for (const e of Array.from(document.getElementsByClassName("t1resultCell"))) {
@@ -322,10 +388,10 @@ async function resendEditedData() {
     for (const e of Array.from(document.getElementsByClassName("t2resultCell"))) {
 	newTreebank2.push(e.textContent);
     }
-    console.log(newTreebank1);
+    // Update the treebanks
     formData.delete("treebank1");
-    console.log(formData);
     formData.set("treebank1", new File(newTreebank1,"treebank1tmp.conllu"))
+    formData.delete("treebank2");
     formData.set("treebank2", new File(newTreebank2,"treebank2tmp.conllu"))
     queryData(formData);
     resetEditable();
@@ -337,7 +403,7 @@ async function resendEditedData() {
 async function queryData(formData) {
     var error = false;
     // Show overlay
-    showOverlay();
+    showOverlay("Analyze using STUnD backend");
     // Remove all previous errors
     removeErrorMessages();
     resetAllErrors();
@@ -438,8 +504,10 @@ async function queryData(formData) {
 /*
   Shows the overlay while the process in operation
 */
-function showOverlay() {
+function showOverlay(message) {
     document.getElementById("overlay").style.display = "block";
+    // Add a message to the overlay
+    document.getElementById("overlayMessage").append(new Text(message));
 }
 
 /*
@@ -447,4 +515,6 @@ function showOverlay() {
 */
 function hideOverlay() {
     document.getElementById("overlay").style.display = "none";
+    // Remove message
+    document.getElementById("overlayMessage").firstChild.remove();
 }
