@@ -323,7 +323,7 @@ async function parsePlaintext(treebank) {
     // We have to guess the language
     else {
 	// Use langid.js (https://github.com/saffsd/langid.js) to identify the language
-	showOverlay("Identify language");
+	showOverlay("identifying language...");
 	lang = langid.identify(await treebank.text());
 	hideOverlay();
     }
@@ -337,7 +337,7 @@ async function parsePlaintext(treebank) {
 	udopipeData.set("tagger", "");
 	udopipeData.set("parser", "");
 	udopipeData.set("data", await treebank.text());
-	showOverlay("Parse using UDPipe");
+	showOverlay("parsing via UDPipe...");
 	var treebankData = await fetch("https://lindat.mff.cuni.cz/services/udpipe/api/process", {
 	    method: "POST",
 	    body: udopipeData,
@@ -403,7 +403,7 @@ async function resendEditedData() {
 async function queryData(formData) {
     var error = false;
     // Show overlay
-    showOverlay("Analyze using STUnD backend");
+    showOverlay("validating input and running query...");
     // Remove all previous errors
     removeErrorMessages();
     resetAllErrors();
