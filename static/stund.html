@@ -49,40 +49,47 @@
 	</datalist>
       </span>
     </div>
-    <div id="modebar" >
-      <span>
-        <label for="mode">Mode</label>
-      </span>
-      <span>
-        <input type="radio" id="textMode" name="mode" value="TextMode" checked />
-	<label for="textMode">text</label>
-        <input type="radio" id="conllMode" name="mode" value="CoNNLUMode" />
-	<label for="conllMode">CoNLL-U</label>
-        <input type="radio" id="treeMode" name="mode" value="TreeMode" />
-	<label for="treeMode">tree</label>
-      </span>
-    </div>
-    <div id="optionbar">
-      <span>
-	<input type="checkbox" id="showContext" name="showContext" value="True" />
-        <label for="diff">show context</label>
-        <input type="checkbox" id="diff" name="diff" value="True" />
-        <label for="diff">show diff</label>
-      </span>
-      &nbsp;
-      <input type="hidden" id="checkedTreebank1" name="checkedTreebank1" value="false" />
-      <input type="hidden" id="checkedTreebank2" name="checkedTreebank2" value="false" />
-      <input type="hidden" id="editedTreebank1" name="editedTreebank1" value="false" />
-      <input type="hidden" id="editedTreebank2" name="editedTreebank2" value="false" />
-      <input type="hidden" id="t1file" name="t1file" />
-      <input type="hidden" id="t2file" name="t2file" />
-      <input type="hidden" id="t1t2file" name="t1t2file" />
-    </div>
-    <div if="buttonbar">
-      <span>
-        <input type="button" value="search" onclick="sendFiles()" />
-        <input type="reset" value="reset" />
-      </span>
+    <div id="bardiv">
+      <div id="modebar" class="bar">
+        <span>
+          <label for="mode">Mode</label>
+        </span>
+        <span>
+          <input type="radio" id="textMode" name="mode" value="TextMode" checked />
+	        <label for="textMode">text</label>
+          <input type="radio" id="conllMode" name="mode" value="CoNNLUMode" />
+	        <label for="conllMode">CoNLL-U</label>
+          <input type="radio" id="treeMode" name="mode" value="TreeMode" />
+	        <label for="treeMode">tree</label>
+        </span>
+      </div>
+
+      <div id="optionbar" class="bar">
+        <span>
+          <label for="mode">Options</label>
+        </span>
+        <span>
+	        <input type="checkbox" id="context" name="context" value="True" disabled="True"/>
+          <label for="context">context</label>
+          <input type="checkbox" id="diff" name="diff" value="True" />
+          <label for="diff">diff</label>
+        </span>
+        &nbsp;
+        <input type="hidden" id="checkedTreebank1" name="checkedTreebank1" value="false" />
+        <input type="hidden" id="checkedTreebank2" name="checkedTreebank2" value="false" />
+        <input type="hidden" id="editedTreebank1" name="editedTreebank1" value="false" />
+        <input type="hidden" id="editedTreebank2" name="editedTreebank2" value="false" />
+        <input type="hidden" id="t1file" name="t1file" />
+        <input type="hidden" id="t2file" name="t2file" />
+        <input type="hidden" id="t1t2file" name="t1t2file" />
+      </div>
+
+      <div id="buttonbar" class="bar">
+        <span>
+          <input type="reset" value="Reset" />
+          <input type="button" value="Search" onclick="sendFiles()" />
+        </span>
+      </div>
     </div>
   </form>
   <div id="errorDiv" class="unselectable"></div>
