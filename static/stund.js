@@ -197,10 +197,8 @@ function createLine(n,leftField,rightField) {
 	leftTxtDiv = document.createElement("div"),
 	rightNumDiv = document.createElement("div"),
 	rightTxtDiv = document.createElement("div");
-    leftNumDiv.classList.add("numdiv");
-    leftNumDiv.classList.add("align-left");
-    rightNumDiv.classList.add("numdiv");
-    rightNumDiv.classList.add("align-right");
+    leftNumDiv.classList.add("numdiv", "align-left", "unselectable");
+    rightNumDiv.classList.add("numdiv","align-right", "unselectable");
     leftTxtDiv.classList.add("txtdiv");
     rightTxtDiv.classList.add("txtdiv");
     leftSpan.appendChild(leftNumDiv);
