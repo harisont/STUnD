@@ -16,14 +16,6 @@ STUnD is a Haskell+JavaScript web application built by Herbert Lange and Arianna
 ## Citing
 If you use this tool in your research, you are welcome to cite
 
-```
-@inproceedings{masciolini2024stund,
-  title={{STUnD}: ett S{\"o}kverktyg f{\"o}r Tv{\aa}spr{\aa}kiga Universal Dependencies-tr{\"a}dbanker},
-  author={Masciolini, Arianna and T{\'o}th, M{\'a}rton A},
-  booktitle={Huminfra Conference},
-  pages={95--109},
-  year={2024}
-}
-```
+> [Arianna Masciolini and Márton A Tóth. _STUnD: ett Sökverktyg för Tvåspråkiga Universal Dependencies-trädbanker._ In Proceedings of the Huminfra Conference, pages 95–109, Gothenburg, Sweden, 2024](https://doi.org/10.3384/ecp205013) ([bibtex](stund.bib)).
 
 A more extensive and up-to-date publication in English is currently in preparation.
