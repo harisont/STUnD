@@ -7,6 +7,8 @@ layout: base
 
 To compile and run STUnD directly on your computer, you can use either [the Haskell Tool Stack](https://docs.haskellstack.org/en/stable/) or build and run it inside a [Docker](https://www.docker.com/) container.
 
+In either case, start by downloading the [source code](https://github.com/harisont/STUnD).
+
 ## Installation via Stack
 If you have Stack, run  
 
