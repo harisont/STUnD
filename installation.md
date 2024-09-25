@@ -1,5 +1,5 @@
 ---
-title: Getting started with STUnD
+title: Installation
 layout: base
 ---
 
