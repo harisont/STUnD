@@ -1,4 +1,4 @@
-A Search Tool for (parallel) Universal Dependencies treebanks that runs in your browser.
+A Search Tool for (parallel) Universal Dependencies treebanks that runs [in your browser](https://demo.spraakbanken.gu.se/stund).
 
 ![STUnD GUI](img/replacement2.png)
 
