@@ -1,5 +1,3 @@
-# STUnD
-
 A Search Tool for (parallel) Universal Dependencies treebanks that runs in your browser.
 
 ![STUnD GUI](img/replacement2.png)
