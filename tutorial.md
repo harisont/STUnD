@@ -1,7 +1,9 @@
 ---
-title: Getting started with STUnD
+title: Tutorial
 layout: base
 ---
+
+# Getting started with STUnD
 
 ## Specifying input files
 ![start screen](img/start.png)
