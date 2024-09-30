@@ -356,12 +356,25 @@ async function parsePlaintext(treebank) {
 	    method: "POST",
 	    body: udopipeData,
 	})
-	.then((data) => {
-	    return data.json();
-	});
-	hideOverlay();
+	    .then((response) => {
+		hideOverlay();
+		// Check response status
+		if (response.status != 200) {
+		    // Create error message
+		    response.text().then((txt) => {
+			var msg = "Error with UDPipe: " + txt;
+			addErrorMessage(msg);
+		    });
+		    // Create fake empty JSON
+		    return {"result": ""};
+		}
+		else {
+		    // If no problem with parsing, return as JSON
+		    return response.json();
+		}
+	    });
 	return treebankData.result;
-    }
+    }	
 }
 
 /*
@@ -377,18 +390,31 @@ async function parseAndSendFiles() {
 	// Cancel on user input
 	return;
     }
+    var emptyTreebank = false;
     // Update the treebanks
     if (treebank1.name.endsWith("txt")) {
 	var treebankData = await parsePlaintext(treebank1);
-	formData.delete("treebank1"); 
-	formData.set("treebank1", new File([treebankData],"treebank1udpipe.conllu"))
+	if (treebankData != "") {
+	    formData.delete("treebank1"); 
+	    formData.set("treebank1", new File([treebankData],"treebank1udpipe.conllu"))
+	}
+	else {
+	    emptyTreebank = true;
+	}
     }
     if (treebank2.name.endsWith("txt")) {
 	var treebankData = await parsePlaintext(treebank2);
-	formData.delete("treebank2"); 
-	formData.set("treebank2", new File([treebankData],"treebank2udpipe.conllu"))
+	if (treebankData != "") {
+	    formData.delete("treebank2"); 
+	    formData.set("treebank2", new File([treebankData],"treebank2udpipe.conllu"))
+	}
+	else {
+	    emptyTreebank = true;
+	}
     }
-    queryData(formData);
+    if (!emptyTreebank) {
+	queryData(formData);
+    }
 }
 
 async function resendEditedData() {
