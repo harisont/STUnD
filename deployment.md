@@ -18,6 +18,8 @@ After the build has succeeded you can simply run it using
 stack run
 ```
 
+After you see this message (`Setting phasers to stun... (port 3000) (ctrl-c to quit)`) you can access STUnD by directing your webbrowser to http://localhost:3000
+
 ## Containers
 
 A second way of deploying STUnD is using containers. Two common container solutions are `Docker` and `Podman` (which is mostly compatible with `Docker`). The latter has the advantage that the containers can be more eaily run by ordinary users. The configuration is split into two files `Dockerfile` and `compose.yml`. The first file defines how the image containing `STUnD` can be built. The second one describes how the container can be built on top of the image using the `docker-compose` or `podman-compose` tool.
