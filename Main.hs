@@ -216,17 +216,17 @@ searchTreebanks =
                             if diff && isJust t2file
                               then rtmap (\w -> 
                                 if w `elem` ws 
-                                  then w {udFORM = "<mark>" ++ udFORM w ++ "</mark>"}
+                                  then w {udFORM = "<div class=\"mark\">" ++ udFORM w ++ "</div>"}
                                   else w) m 
                               else m
                       in ((case mode of
                               TextMode -> highlin (tree2sentence $ mark t1 diws1) (tree2sentence $ mark m1 diws1) HTML
                               CoNNLUMode -> (prt m1') ++ "\n"
-                              TreeMode -> sentence2svgFragment $ m1',
+                              TreeMode -> fixSVG $ sentence2svgFragment $ m1',
                           case mode of
                              TextMode -> highlin (tree2sentence $ mark t2 diws2) (tree2sentence $ mark m2 diws2) HTML
                              CoNNLUMode -> (prt m2') ++ "\n"
-                             TreeMode -> sentence2svgFragment $ m2'))) 
+                             TreeMode -> fixSVG $ sentence2svgFragment $ m2'))) 
                   ms)
             (matches' `zip` diws)
     t1t2Tmpfile <- liftIO $ writeMaybeTempFile t1t2file "t1-t2-.tsv" $ unlines $ map
@@ -248,9 +248,11 @@ searchTreebanks =
         t2file = Nothing,
         t1t2file = Nothing }
       where
-        -- remove markup tags <b> and <mark>
-        rmMarkup s = replace "</mark>" "" $ replace "<mark>" "" $ replace "</b>" "" $ replace "<b>" "" s
-        -- replace <b>text</b> markup by upppercase TEXT
+        -- undo HTML injection into SVG, replace with proper attribute
+        fixSVG s = rmMarkup $ replace ">\n    <div" "" $ replace "&gt;" ">" $ replace "&lt;" "<" s
+        -- remove markup tags <b> and <div class="mark">
+        rmMarkup s = replace "</div>" "" $ replace "<div class=\"mark\">" "" $ replace "</b>" "" $ replace "<b>" "" s
+        -- replace <b>text</b> markup by uppercase TEXT
         mkUpper s
           | L.isPrefixOf "<b>" s = mkUpper' $ drop 3 s
           | null s = ""
