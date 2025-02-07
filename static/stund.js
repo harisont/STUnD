@@ -281,11 +281,11 @@ function loadFromStore(category) {
 
 
 /*
-  Send form on press of the return key
+  Send form on press of the return key. Same as pressing the button
 */
 function handleReturnKey(e) {
     if(e && e.keyCode == 13) {
-	sendData();
+	document.getElementById("sendDataButton").click()
     }
 }
 
