@@ -188,7 +188,7 @@ searchTreebanks =
                (s,map (applyReplacement (fromJust $ mreplacement)) es))
             (filter (\(_,ms) -> not $ null ms) matches) 
     -- TODO: replace init with something more minimalistic/accounting for root
-    let divergences = map (init . extractDivergences) alignments
+    let divergences = map ((\ds -> if (not . null) ds then init ds else []) . extractDivergences) alignments
     let diws = -- UDWords to be marked if diff mode is on
           map 
             (\(wws1,wws2) -> 
@@ -196,7 +196,7 @@ searchTreebanks =
             (map 
               unzip 
               (map (map (\(t1,t2) -> (allNodes t1, allNodes t2))) divergences)
-            ) -- :: [([UDWord], [UDWord])]
+            ) 
     --let matches'' = 
     --      if diff && isJust t2file
     --        then undefined --TODO:
