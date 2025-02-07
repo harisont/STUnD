@@ -187,8 +187,9 @@ searchTreebanks =
             (\(s,es) ->
                (s,map (applyReplacement (fromJust $ mreplacement)) es))
             (filter (\(_,ms) -> not $ null ms) matches) 
-    -- TODO: replace init with something more minimalistic/accounting for root
-    let divergences = map ((\ds -> if (not . null) ds then init ds else []) . extractDivergences) alignments
+    -- idk if "minimal" is actually a good way to do this, especially
+    -- for cases other than annotation conflict resolution (id text) 
+    let divergences = map (minimal . extractDivergences) alignments
     let diws = -- UDWords to be marked if diff mode is on
           map 
             (\(wws1,wws2) -> 
