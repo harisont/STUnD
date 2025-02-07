@@ -208,7 +208,7 @@ searchTreebanks =
             matches'
     t1t2Tmpfile <- liftIO $ writeMaybeTempFile t1t2file "t1-t2-.tsv" $ unlines $ map
         (\(t1,t2) -> t1 ++ "\t" ++ t2)
-        ((map rmMarkup t1Col) `zip` (map rmMarkup t2Col))
+        ((map (rmMarkup . mkUpper) t1Col) `zip` (map (rmMarkup . mkUpper) t2Col))
     t1Tmpfile <- liftIO $ writeMaybeTempFile t1file "t1-.htm" $ case mode of { TextMode -> rmMarkup $ mkUpper $ unlines t1Col ; _ -> rmMarkup $ unlines t1Col }
     t2Tmpfile <- liftIO $ writeMaybeTempFile t2file "t2-.htm" $ case mode of { TextMode -> rmMarkup $ mkUpper $ unlines t2Col ; _ -> rmMarkup $ unlines t2Col }
     json $ if (not . null . T.unpack) t2Text  
