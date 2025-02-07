@@ -434,10 +434,24 @@ async function resendEditedData() {
     }
     // Update the treebanks
     formData.delete("treebank1");
-    formData.set("treebank1", new File(newTreebank1,"treebank1tmp.conllu"))
     formData.delete("treebank2");
-    formData.set("treebank2", new File(newTreebank2,"treebank2tmp.conllu"))
+    var newFile1 = new File(newTreebank1,"editedTreebank1.conllu")
+    var newFile2 = new File(newTreebank2,"editedTreebank2.conllu")
+    formData.set("treebank1", newFile1)
+    formData.set("treebank2", newFile2)
     queryData(formData);
+    // Potentially replace previous files if they have been edited
+    let container = new DataTransfer();
+    if (document.getElementById("editedTreebank1").value == "true") {
+	container.items.add(newFile1);
+	document.getElementById("treebank1").files=container.files
+    }
+    if (document.getElementById("editedTreebank2").value == "true") {
+	container.items.clear()
+	container.items.add(newFile2);
+	document.getElementById("treebank2").files=container.files
+    }
+    // Reset editable
     resetEditable();
 }
 
