@@ -14,15 +14,18 @@ import Data.Text.Lazy.Encoding (encodeUtf8, decodeUtf8)
 import Data.Maybe
 import Data.List.Utils
 import Text.PrettyPrint (render)
+import RTree
 import UDStandard
 import UDTrees
 import UDPatterns
 import UDVisualizations
 import Utils.UDConcepts
 import Utils.Output
+import Utils.Misc
 import Align
 import Match hiding (matchingSubtrees)
 import Errors
+import Extract
 
 import Data.Text.Lazy (Text)
 import qualified Data.Text.Lazy as T
@@ -163,7 +166,7 @@ searchTreebanks =
                     else Left $ repeat (tree2sentence dummyUDTree)
     -- Align sentences
     let treebank = (fromLeft [] t1Sents) `zip` (fromLeft [] t2Sents)
-    let alignments = map align treebank
+    let alignments = map align treebank :: [[(UDTree,UDTree)]]
     -- true bilingual matches
     let bimatches = treebank `zip` map (match patterns) alignments
     -- all matches (add treebank 1-only with dummy alignments)
@@ -177,35 +180,53 @@ searchTreebanks =
                       (repeat $ dummyUDTree))
                 else bms)
           bimatches
-    let matches' =
+    let matches' = -- apply replacements
           map
             (\(s,es) ->
                (s,map (applyReplacement (fromJust $ mreplacement)) es))
-            (filter (\(_,ms) -> not $ null ms) matches)
+            (filter (\(_,ms) -> not $ null ms) matches) 
+    -- TODO: replace init with something more minimalistic/accounting for root
+    let divergences = map (init . extractDivergences) alignments
+    let diws = -- UDWords to be marked if diff mode is on
+          map 
+            (\(wws1,wws2) -> 
+              (rmDuplicates $ concat wws1, rmDuplicates $ concat wws2)) 
+            (map 
+              unzip 
+              (map (map (\(t1,t2) -> (allNodes t1, allNodes t2))) divergences)
+            ) -- :: [([UDWord], [UDWord])]
+    --let matches'' = 
+    --      if diff && isJust t2file
+    --        then undefined --TODO:
+    --        else matches'
     let (t1Col,t2Col) =
           unzip $ concatMap
-            (\((s1,s2),ms) ->
+            (\(((s1,s2),ms),(diws1,diws2)) ->
                 map
                   (\(m1,m2) ->
                       let m1' =
                             if m1 == dummyUDTree
-                            then tree2sentence m1
-                            else tree2sentence (subtree2tree m1)
-                          m2' = tree2sentence (subtree2tree m2)
-                          mark content = 
-                            if diff && m1 /= m2 && isJust t2file
-                              then "<mark>" ++ content ++ "</mark>"
-                              else content
-                      in ((mark (case mode of
+                            then tree2sentence (mark m1 diws1)
+                            else tree2sentence (subtree2tree (mark m1 diws1))
+                          m2' = tree2sentence (subtree2tree (mark m2 diws2))
+                          mark :: UDTree -> [UDWord] -> UDTree
+                          mark m ws = 
+                            if diff && isJust t2file
+                              then rtmap (\w -> 
+                                if w `elem` ws 
+                                  then w {udFORM = "<mark>" ++ udFORM w ++ "</mark>"}
+                                  else w) m 
+                              else m
+                      in ((case mode of
                               TextMode -> highlin s1 (tree2sentence m1) HTML
                               CoNNLUMode -> (prt m1') ++ "\n"
-                              TreeMode -> sentence2svgFragment $ m1'),
-                          mark (case mode of
+                              TreeMode -> sentence2svgFragment $ m1',
+                          case mode of
                              TextMode -> highlin s2 (tree2sentence m2) HTML
                              CoNNLUMode -> (prt m2') ++ "\n"
-                             TreeMode -> sentence2svgFragment $ m2')))) 
+                             TreeMode -> sentence2svgFragment $ m2'))) 
                   ms)
-            matches'
+            (matches' `zip` diws)
     t1t2Tmpfile <- liftIO $ writeMaybeTempFile t1t2file "t1-t2-.tsv" $ unlines $ map
         (\(t1,t2) -> t1 ++ "\t" ++ t2)
         ((map rmMarkup t1Col) `zip` (map rmMarkup t2Col))
