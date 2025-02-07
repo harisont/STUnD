@@ -165,18 +165,20 @@ searchTreebanks =
                     then prsUDText $ T.unpack t2Text 
                     else Left $ repeat (tree2sentence dummyUDTree)
     -- Align sentences
-    let treebank = (fromLeft [] t1Sents) `zip` (fromLeft [] t2Sents)
-    let alignments = map align treebank :: [[(UDTree,UDTree)]]
+    let sentPairs = (fromLeft [] t1Sents) `zip` (fromLeft [] t2Sents)
+    let treebank = 
+          map (\(s1,s2) -> (sentence2tree s1,sentence2tree s2)) sentPairs 
+    let alignments = map align sentPairs :: [[(UDTree,UDTree)]]
     -- true bilingual matches
     let bimatches = treebank `zip` map (match patterns) alignments
     -- all matches (add treebank 1-only with dummy alignments)
     let matches = map
-          (\bms@((s1,s2),ms) ->
+          (\bms@((t1,t2),ms) ->
              let pattern = patterns !! 0
              in if isMonolingual pattern
-                  then ((s1,s2), ms ++ zip (filter 
+                  then ((t1,t2), ms ++ zip (filter 
                     (\t -> not $ t `elem` (map fst ms))
-                    (matchingSubtrees (fst $ (pattern)) (sentence2tree s1)))
+                    (matchingSubtrees (fst $ (pattern)) t1))
                       (repeat $ dummyUDTree))
                 else bms)
           bimatches
@@ -201,7 +203,7 @@ searchTreebanks =
     --        else matches'
     let (t1Col,t2Col) =
           unzip $ concatMap
-            (\(((s1,s2),ms),(diws1,diws2)) ->
+            (\(((t1,t2),ms),(diws1,diws2)) ->
                 map
                   (\(m1,m2) ->
                       let m1' =
@@ -218,11 +220,11 @@ searchTreebanks =
                                   else w) m 
                               else m
                       in ((case mode of
-                              TextMode -> highlin s1 (tree2sentence m1) HTML
+                              TextMode -> highlin (tree2sentence $ mark t1 diws1) (tree2sentence $ mark m1 diws1) HTML
                               CoNNLUMode -> (prt m1') ++ "\n"
                               TreeMode -> sentence2svgFragment $ m1',
                           case mode of
-                             TextMode -> highlin s2 (tree2sentence m2) HTML
+                             TextMode -> highlin (tree2sentence $ mark t2 diws2) (tree2sentence $ mark m2 diws2) HTML
                              CoNNLUMode -> (prt m2') ++ "\n"
                              TreeMode -> sentence2svgFragment $ m2'))) 
                   ms)
