@@ -423,10 +423,14 @@ async function resendEditedData() {
     var newTreebank1 = []
     var newTreebank2 = []
     for (const e of Array.from(document.getElementsByClassName("t1resultCell"))) {
-	newTreebank1.push(e.textContent);
+	for (const ee of Array.from(e.getElementsByClassName("txtdiv"))) {
+	    newTreebank1.push(ee.textContent)
+	}
     }
     for (const e of Array.from(document.getElementsByClassName("t2resultCell"))) {
-	newTreebank2.push(e.textContent);
+	for (const ee of Array.from(e.getElementsByClassName("txtdiv"))) {
+	    newTreebank2.push(ee.textContent)
+	}
     }
     // Update the treebanks
     formData.delete("treebank1");
