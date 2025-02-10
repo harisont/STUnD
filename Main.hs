@@ -26,6 +26,7 @@ import Errors
 
 import Data.Text.Lazy (Text)
 import qualified Data.Text.Lazy as T
+import Data.String.Conversions
 import qualified Data.Map as M
 import qualified Data.List as L
 import Data.Char
@@ -265,7 +266,11 @@ downloadTmpFile =
     fileName <- queryParam "filename"
     if L.isPrefixOf tmpPath fileName then
       do
-        setHeader "Content-Type" "text/plain; charset=utf-8"
+        if L.isSuffixOf "svg" fileName then
+          setHeader "Content-Type" "image/svg+xml; charset=utf-8"
+        else
+          setHeader "Content-Type" "text/plain; charset=utf-8"
+        setHeader "Content-Disposition:" $ convertString $ "attachment; filename=\"" ++ fileName ++ "\""
         file fileName 
     else
       S.status $ mkStatus 403 "Access denied"
