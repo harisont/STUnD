@@ -209,8 +209,8 @@ searchTreebanks =
     t1t2Tmpfile <- liftIO $ writeMaybeTempFile t1t2file "t1-t2-.tsv" $ unlines $ map
         (\(t1,t2) -> t1 ++ "\t" ++ t2)
         ((map (rmMarkup . mkUpper) t1Col) `zip` (map (rmMarkup . mkUpper) t2Col))
-    t1Tmpfile <- liftIO $ writeMaybeTempFile t1file "t1-.htm" $ case mode of { TextMode -> rmMarkup $ mkUpper $ unlines t1Col ; _ -> rmMarkup $ unlines t1Col }
-    t2Tmpfile <- liftIO $ writeMaybeTempFile t2file "t2-.htm" $ case mode of { TextMode -> rmMarkup $ mkUpper $ unlines t2Col ; _ -> rmMarkup $ unlines t2Col }
+    t1Tmpfile <- liftIO $ (\(fname, fdata) -> writeMaybeTempFile t1file fname fdata) $ case mode of { TextMode -> ("t1-.txt", rmMarkup $ mkUpper $ unlines t1Col) ; CoNNLUMode -> ("t1-.conllu", rmMarkup $ unlines t1Col) ; TreeMode -> ("t1-.svg", rmMarkup $ unlines t1Col) }
+    t2Tmpfile <- liftIO $ (\(fname, fdata) -> writeMaybeTempFile t1file fname fdata) $ case mode of { TextMode -> ("t2-.txt", rmMarkup $ mkUpper $ unlines t2Col) ; CoNNLUMode -> ("t2-.conllu", rmMarkup $ unlines t2Col) ; TreeMode -> ("t2-.svg", rmMarkup $ unlines t2Col) }
     json $ if (not . null . T.unpack) t2Text  
       then Result { -- parallel treebank
         t1 = t1Col, 
