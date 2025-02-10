@@ -13,6 +13,7 @@ import Text.Read (readMaybe)
 import Data.Text.Lazy.Encoding (encodeUtf8, decodeUtf8)
 import Data.Maybe
 import Data.List.Utils
+import Data.List
 import Text.PrettyPrint (render)
 import RTree
 import UDStandard
@@ -60,6 +61,8 @@ data ParseStatus = Status {
 data AlignmentResult = Result {
   t1 :: [String],
   t2 :: [String],
+  h1 :: [[Int]], -- highlights t1
+  h2 :: [[Int]], -- highlights t2
   t1file :: Maybe String,
   t2file :: Maybe String,
   t1t2file :: Maybe String
@@ -191,9 +194,9 @@ searchTreebanks =
     -- for cases other than annotation conflict resolution (id text) 
     let divergences = map (minimal . extractDivergences) alignments
     let diws = -- UDWords to be marked if diff mode is on
-          map 
+          unzip $ map 
             (\(wws1,wws2) -> 
-              (rmDuplicates $ concat wws1, rmDuplicates $ concat wws2)) 
+              (map (id2int . udID) $ rmDuplicates $ concat wws1, map (id2int . udID) $ rmDuplicates $ concat wws2)) 
             (map 
               unzip 
               (map (map (\(t1,t2) -> (allNodes t1, allNodes t2))) divergences)
@@ -204,32 +207,24 @@ searchTreebanks =
     --        else matches'
     let (t1Col,t2Col) =
           unzip $ concatMap
-            (\(((t1,t2),ms),(diws1,diws2)) ->
+            (\((t1,t2),ms) ->
                 map
                   (\(m1,m2) ->
                       let m1' =
                             if m1 == dummyUDTree
-                            then tree2sentence (mark m1 diws1)
-                            else tree2sentence (subtree2tree (mark m1 diws1))
-                          m2' = tree2sentence (subtree2tree (mark m2 diws2))
-                          mark :: UDTree -> [UDWord] -> UDTree
-                          mark m ws = 
-                            if diff && isJust t2file
-                              then rtmap (\w -> 
-                                if w `elem` ws 
-                                  then w {udFORM = "<div class=\"mark\">" ++ udFORM w ++ "</div>"}
-                                  else w) m 
-                              else m
+                            then tree2sentence m1
+                            else tree2sentence $ subtree2tree m1
+                          m2' = tree2sentence $ subtree2tree m2
                       in ((case mode of
-                              TextMode -> highlin (tree2sentence $ mark t1 diws1) (tree2sentence $ mark m1 diws1) HTML
+                              TextMode -> highlin (tree2sentence t1) (tree2sentence m1) HTML
                               CoNNLUMode -> (prt m1') ++ "\n"
-                              TreeMode -> fixSVG $ sentence2svgFragment $ m1',
+                              TreeMode -> sentence2svgFragment m1',
                           case mode of
-                             TextMode -> highlin (tree2sentence $ mark t2 diws2) (tree2sentence $ mark m2 diws2) HTML
+                             TextMode -> highlin (tree2sentence t2) (tree2sentence m2) HTML
                              CoNNLUMode -> (prt m2') ++ "\n"
-                             TreeMode -> fixSVG $ sentence2svgFragment $ m2'))) 
+                             TreeMode -> sentence2svgFragment m2'))) 
                   ms)
-            (matches' `zip` diws)
+            matches'
     t1t2Tmpfile <- liftIO $ writeMaybeTempFile t1t2file "t1-t2-.tsv" $ unlines $ map
         (\(t1,t2) -> t1 ++ "\t" ++ t2)
         ((map rmMarkup t1Col) `zip` (map rmMarkup t2Col))
@@ -239,20 +234,22 @@ searchTreebanks =
       then Result { -- parallel treebank
         t1 = t1Col, 
         t2 = t2Col, 
+        h1 = fst diws,
+        h2 = snd diws,
         t1file = Just t1Tmpfile, 
         t2file = Just t2Tmpfile, 
         t1t2file = Just t1t2Tmpfile }
       else Result { -- single treebank
         t1 = t1Col,
         t2 = [],
+        h1 = [],
+        h2 = [],
         t1file = Just t1Tmpfile,
         t2file = Nothing,
         t1t2file = Nothing }
       where
         -- undo HTML injection into SVG, replace with proper attribute
-        fixSVG s = rmMarkup $ replace ">\n    <div" "" $ replace "&gt;" ">" $ replace "&lt;" "<" s
-        -- remove markup tags <b> and <div class="mark">
-        rmMarkup s = replace "</div>" "" $ replace "<div class=\"mark\">" "" $ replace "</b>" "" $ replace "<b>" "" s
+        rmMarkup s = replace "</b>" "" $ replace "<b>" "" s
         -- replace <b>text</b> markup by uppercase TEXT
         mkUpper s
           | L.isPrefixOf "<b>" s = mkUpper' $ drop 3 s
