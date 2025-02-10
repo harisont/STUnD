@@ -47,6 +47,21 @@ import Debug.Trace
 
 data Mode = TextMode | CoNNLUMode | TreeMode deriving (Eq, Read, Show, Enum)
 
+htmlStart =
+  unlines ["<!DOCTYPE html>",
+            "<html lang=\"en\">",
+            "<head>",
+            "<meta charset=\"utf-8\">",
+            "<title>STUnD trees</title>",
+            "</head>",
+            "<body>"
+          ]
+
+htmlEnd = 
+  unlines [ "</body>",
+            "</html>"
+          ]
+
 -- Result of the check_* API endpoints
 data ParseStatus = Status {
   status :: Text, -- valid or invalid
@@ -210,8 +225,8 @@ searchTreebanks =
     t1t2Tmpfile <- liftIO $ writeMaybeTempFile t1t2file "t1-t2-.tsv" $ unlines $ map
         (\(t1,t2) -> t1 ++ "\t" ++ t2)
         ((map (rmMarkup . mkUpper) t1Col) `zip` (map (rmMarkup . mkUpper) t2Col))
-    t1Tmpfile <- liftIO $ (\(fname, fdata) -> writeMaybeTempFile t1file fname fdata) $ case mode of { TextMode -> ("t1-.txt", rmMarkup $ mkUpper $ unlines t1Col) ; CoNNLUMode -> ("t1-.conllu", rmMarkup $ unlines t1Col) ; TreeMode -> ("t1-.svg", rmMarkup $ unlines t1Col) }
-    t2Tmpfile <- liftIO $ (\(fname, fdata) -> writeMaybeTempFile t1file fname fdata) $ case mode of { TextMode -> ("t2-.txt", rmMarkup $ mkUpper $ unlines t2Col) ; CoNNLUMode -> ("t2-.conllu", rmMarkup $ unlines t2Col) ; TreeMode -> ("t2-.svg", rmMarkup $ unlines t2Col) }
+    t1Tmpfile <- liftIO $ (\(fname, fdata) -> writeMaybeTempFile t1file fname fdata) $ case mode of { TextMode -> ("t1-.txt", rmMarkup $ mkUpper $ unlines t1Col) ; CoNNLUMode -> ("t1-.conllu", rmMarkup $ unlines t1Col) ; TreeMode -> ("t1-.html", htmlStart ++ (rmMarkup $ unlines $ L.intersperse "\n<br>\n" t1Col) ++ htmlEnd) }
+    t2Tmpfile <- liftIO $ (\(fname, fdata) -> writeMaybeTempFile t1file fname fdata) $ case mode of { TextMode -> ("t2-.txt", rmMarkup $ mkUpper $ unlines t2Col) ; CoNNLUMode -> ("t2-.conllu", rmMarkup $ unlines t2Col) ; TreeMode -> ("t2-.html", htmlStart ++ (rmMarkup $ unlines $ L.intersperse "\n<br>\n" t2Col) ++ htmlEnd) }
     json $ if (not . null . T.unpack) t2Text  
       then Result { -- parallel treebank
         t1 = t1Col, 
@@ -266,8 +281,8 @@ downloadTmpFile =
     fileName <- queryParam "filename"
     if L.isPrefixOf tmpPath fileName then
       do
-        if L.isSuffixOf "svg" fileName then
-          setHeader "Content-Type" "image/svg+xml; charset=utf-8"
+        if L.isSuffixOf "html" fileName then
+          setHeader "Content-Type" "text/html; charset=utf-8"
         else
           setHeader "Content-Type" "text/plain; charset=utf-8"
         setHeader "Content-Disposition:" $ convertString $ "attachment; filename=\"" ++ fileName ++ "\""
