@@ -59,6 +59,14 @@ function resetAllErrors() {
 }
 
 /*
+  Resets the temp files when the editing mode is changed
+*/
+function resetTempFiles() {
+    document.getElementById("t1file").value = null
+    document.getElementById("t2file").value = null
+}
+
+/*
   Makes all fields in a CONLL treebank editable an manage button stuff
 */
 function makeEditable(treebank) {
