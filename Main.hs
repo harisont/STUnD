@@ -233,12 +233,13 @@ searchTreebanks =
         ((map rmMarkup t1Col) `zip` (map rmMarkup t2Col))
     t1Tmpfile <- liftIO $ writeMaybeTempFile t1file "t1-.htm" $ case mode of { TextMode -> rmMarkup $ mkUpper $ unlines t1Col ; _ -> rmMarkup $ unlines t1Col }
     t2Tmpfile <- liftIO $ writeMaybeTempFile t2file "t2-.htm" $ case mode of { TextMode -> rmMarkup $ mkUpper $ unlines t2Col ; _ -> rmMarkup $ unlines t2Col }
+    let differences = map (\((t1,t2),_) -> compareTrees t1 t2) matches' :: [[(UDId,UDId)]]
     json $ if (not . null . T.unpack) t2Text  
       then Result { -- parallel treebank
         t1 = t1Col, 
         t2 = t2Col, 
-        h1 = fst diws,
-        h2 = snd diws,
+        h1 = map (map (id2int . fst)) differences, -- fst diws,
+        h2 = map (map (id2int . snd)) differences,-- snd diws,
         t1file = Just t1Tmpfile, 
         t2file = Just t2Tmpfile, 
         t1t2file = Just t1t2Tmpfile }
@@ -323,3 +324,13 @@ main =
         post "/parse_plaintext" $ parsePlaintext
         post "/search_treebanks" $ searchTreebanks
         get "/tmp_file/" $ downloadTmpFile
+
+
+compareTrees :: UDTree -> UDTree -> [(UDId,UDId)]
+compareTrees (RTree root1 subtrees1) (RTree root2 subtrees2) =
+  let comparedChildren = concatMap (\(t1,t2) -> compareTrees t1 t2) (zip subtrees1 subtrees2)
+  in
+    if (root1 /= root2) then
+      (udID root1,udID root2):comparedChildren
+    else
+      comparedChildren
