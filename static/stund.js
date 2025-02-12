@@ -554,21 +554,21 @@ function highlight(element, indices) {
 	for (const i in indices) {
 	    var mark = document.createElement("span")
 	    mark.className = "mark"
-	    mark.append(element.children[indices[i]])
+	    mark.append(element.children[indices[i]-1])
 	    mark.append(document.createTextNode(" "))
-	    element.insertBefore(mark,element.children[indices[i]])
+	    element.insertBefore(mark,element.children[indices[i]-1])
 	}
     }
     else if (document.getElementById("conllMode").checked) {
 	var lines = element.innerHTML.split("\n")
 	for (const i in indices) {
-	    lines[indices[i]]="<span class=\"mark\">" + lines[indices[i]] + "</span>"
+	    lines[indices[i]-1]="<span class=\"mark\">" + lines[indices[i]-1] + "</span>"
 	}
 	element.innerHTML = lines.join("\n")
     }
     else { // Tree mode
 	for (const i in indices) {
-	    element.getElementsByTagName("text")[indices[i]].style.fill = "#9449D1"
+	    element.getElementsByTagName("text")[indices[i]-1].style.fill = "#9449D1"
 	}
     }
 }
