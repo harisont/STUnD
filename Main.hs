@@ -194,13 +194,16 @@ searchTreebanks =
     -- for cases other than annotation conflict resolution (id text) 
     let divergences = map (minimal . extractDivergences) alignments
     let diws = -- UDWords to be marked if diff mode is on
-          unzip $ map 
+          if diff then
+            unzip $ map 
             (\(wws1,wws2) -> 
-              (map (id2int . udID) $ rmDuplicates $ concat wws1, map (id2int . udID) $ rmDuplicates $ concat wws2)) 
+               (map (id2int . udID) $ rmDuplicates $ concat wws1, map (id2int . udID) $ rmDuplicates $ concat wws2)) 
             (map 
               unzip 
               (map (map (\(t1,t2) -> (allNodes t1, allNodes t2))) divergences)
-            ) 
+            )
+          else
+            ([],[])
     --let matches'' = 
     --      if diff && isJust t2file
     --        then undefined --TODO:
