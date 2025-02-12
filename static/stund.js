@@ -186,7 +186,7 @@ function createTmpLink(file, text) {
 
   Returns a new <div> element
 */
-function createLine(n,leftField,rightField) {
+function createLine(n,leftField,leftHighlight,rightField,rightHighlight) {
     var lineDiv = document.createElement("div"),
 	leftSpan = document.createElement("span"),
 	rightSpan = document.createElement("span");
@@ -207,11 +207,13 @@ function createLine(n,leftField,rightField) {
     rightSpan.appendChild(rightNumDiv);
     leftNumDiv.innerHTML=n;
     leftTxtDiv.innerHTML=leftField;
+    highlight(leftTxtDiv,leftHighlight)
     lineDiv.append(leftSpan);
     if (rightField != undefined) {
 	rightSpan.classList.add("resultCell")
 	rightSpan.classList.add("t2resultCell")
 	rightTxtDiv.innerHTML=rightField;
+	highlight(rightTxtDiv,rightHighlight)
     rightNumDiv.innerHTML=n;
 	lineDiv.append(rightSpan);
     }
@@ -522,10 +524,10 @@ async function queryData(formData) {
 	    resultsDiv.style.fontFamily="monospace,monospace";
 	    // Show the "editable" checkbox
 	    document.getElementById("t1editableSpan").style.setProperty("display", "inline-block");
-        document.getElementById("t1editableSpan").style.setProperty("font-family", "sans-serif");
+            document.getElementById("t1editableSpan").style.setProperty("font-family", "sans-serif");
 	    if (!(response.t2[0] == undefined)) {
 		document.getElementById("t2editableSpan").style.setProperty("display", "inline-block");
-        document.getElementById("t2editableSpan").style.setProperty("font-family", "sans-serif");
+		document.getElementById("t2editableSpan").style.setProperty("font-family", "sans-serif");
 	    }
 	}
 	else {
@@ -536,11 +538,39 @@ async function queryData(formData) {
 	}
 	// Display all the results
 	for (var index = 0; index < response.t1.length; index++) {
-	    resultsDiv.append(createLine(index + 1, response.t1[index],response.t2[index]));
+	    resultsDiv.append(createLine(index + 1, response.t1[index], response.h1[index], response.t2[index],response.h1[index]));
 	}
     }
     // Hide the overlay when we are done
     hideOverlay();
+}
+
+
+/*
+  Highlights divergences in the results
+*/
+function highlight(element, indices) {
+    if (document.getElementById("textMode").checked) {
+	for (const i in indices) {
+	    var mark = document.createElement("span")
+	    mark.className = "mark"
+	    mark.append(element.children[indices[i]])
+	    mark.append(document.createTextNode(" "))
+	    element.insertBefore(mark,element.children[indices[i]])
+	}
+    }
+    else if (document.getElementById("conllMode").checked) {
+	var lines = element.innerHTML.split("\n")
+	for (const i in indices) {
+	    lines[indices[i]]="<span class=\"mark\">" + lines[indices[i]] + "</span>"
+	}
+	element.innerHTML = lines.join("\n")
+    }
+    else { // Tree mode
+	for (const i in indices) {
+	    element.getElementsByTagName("text")[indices[i]].style.fill = "#9449D1"
+	}
+    }
 }
 
 /*
