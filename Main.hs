@@ -193,6 +193,7 @@ searchTreebanks =
     -- idk if "minimal" is actually a good way to do this, especially
     -- for cases other than annotation conflict resolution (id text) 
     let divergences = map (minimal . extractDivergences) alignments
+    --error $ show (map (map (\(t1,t2) -> (prtUDTreeLin t1, prtUDTreeLin t2))) divergences)
     let diws = -- UDWords to be marked if diff mode is on
           if diff then
             unzip $ map 

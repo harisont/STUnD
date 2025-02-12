@@ -550,6 +550,7 @@ async function queryData(formData) {
   Highlights divergences in the results
 */
 function highlight(element, indices) {
+	console.log(indices)
     if (document.getElementById("textMode").checked) {
 	for (const i in indices) {
 	    var mark = document.createElement("span")
