@@ -6,13 +6,13 @@ packages:
 extra-deps:
 - MissingH-1.6.0.1
 - github: harisont/concept-alignment
-  commit: e702c46a32e8a42ba58f0eb42665e2f8ee4ba7d1 # l2-ud branch
+  commit: 23fbce0340e7450ed88cb99a3449043a193a8315 # l2-ud branch
 - github: harisont/L2-UD
-  commit: d10266fe9b4a3d924fcb3b88e94f768eb6eca832 # 2l-ud branch
+  commit: 21105c5e0f6e95ce267e8000077e16e73a2ae6a9 # 2l-ud branch
 - github: harisont/hs-md
   commit: 62e5e955709c332bcc8043678a116fbb38ab455b
 - github: harisont/deptreehs
-  commit: c5261138923b1fe07c2677bb613067e64df51ac5
+  commit: f51085aa9352f9b4fd19876b26e810ddb2622189
 - scotty-0.22@sha256:12365f7867e50368db053b0f3aac96a0bdaace0ff2058cb4a8f17fc10fcea6f7,6022
 - wai-extra-3.1.14@sha256:1b093366842dc0057cebb4a23dbf9a29269321d70fd242c7695ce0bbd80d32fb,8056
 - wai-3.2.4@sha256:e14fde953183f9db8c10da79b44a2b24d241c1203426c5636995069e2dacb1fe,1776

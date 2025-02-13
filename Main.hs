@@ -14,6 +14,7 @@ import Data.Text.Lazy.Encoding (encodeUtf8, decodeUtf8)
 import Data.Maybe
 import Data.List.Utils
 import Data.List
+import Data.Bifunctor
 import Text.PrettyPrint (render)
 import RTree
 import UDStandard
@@ -110,19 +111,19 @@ checkQuery =
 checkReplacement :: ActionM ()
 checkReplacement =
   do
-    replacementTxt <- queryParam "replacement"
-    let replacement =  readMaybe replacementTxt :: Maybe UDReplacement
-    if isNothing replacement then
+    replTxt <- queryParam "replacement"
+    let repl =  readMaybe replTxt :: Maybe UDReplacement
+    if isNothing repl then
       json (Status "invalid" "could not parse replacement" Nothing)
     else
-      json (Status "valid" "" (Just [show $ fromJust replacement]))
+      json (Status "valid" "" (Just [show $ fromJust repl]))
 
 -- Check the validity of a CONLL file
 checkConll :: ActionM ()
 checkConll =
   do
     results <- map (prsUDText . T.unpack . decodeUtf8 . fileContent . snd) <$> files
-    if (all isLeft results) then
+    if all isLeft results then
       json (Status "valid" "" (Just $ map show $ lefts results))
     else
       json (Status "invalid" "input is not in valid CoNLL-U format" $ Just $ concat $ rights results)
@@ -132,64 +133,76 @@ parsePlaintext :: ActionM ()
 parsePlaintext =
   do
     text "Not implemented yet"
-    
+
+-- | A match is a pair that associates a sentence pair with a list of 
+-- alignments matching the query (could/should be moved to L2-UD; the match
+-- function should return this directly)
+type Match = ((UDTree,UDTree), [Alignment])
+
+-- | STUnD's rather permissive matching function, allowing both bilingual and
+-- T1-only matches for monolingual patterns 
+stundMatch :: [(UDTree,UDTree)] -> [(UDPattern,UDPattern)] -> [Match]
+stundMatch ts ps = filter (\(_,ms) -> not $ null ms) $
+  if isMonolingual p then map addDummies bimatches else bimatches
+  where 
+    as = map align ts :: [[(UDTree,UDTree)]]
+    -- proper "bilingual" matches (the pattern is matched both on T1 and T2)
+    bimatches = ts `zip` map (match ps) as
+    p = head ps
+    -- go through proper matches and add (T1-match,dummy) alignments when a
+    -- the query is monolingual and matches T1 without a clear correspondence
+    -- in T2
+    addDummies :: Match -> Match
+    addDummies bm@((t1,t2),ms) = ((t1,t2), ms ++ (monomatches `zip` dummies))
+      where 
+        monomatches = filter 
+          (\t -> t `notElem` map fst ms) 
+          (matchingSubtrees (fst p) t1)
+        dummies = repeat dummyUDTree
+
+stundReplace :: [Match] -> UDReplacement -> [Match]
+stundReplace matches r = map (second (map (applyReplacement r))) matches 
+  where applyReplacement r (e1,e2) =
+          (fst $ replacementsWithUDPattern r e1,
+           fst $ replacementsWithUDPattern r e2)
+
 -- Search the treebank(s) using the query and replacement parameters
 searchTreebanks :: ActionM ()
 searchTreebanks = do
-  -- Get a map of all uploaded files from filename to file info
   formFiles <- M.fromList <$> files
-  -- Get the file mode
-  mode <- read <$> formParam "mode"
-  -- By default do not highlight "diff"
-  diff <- fromMaybe False <$> fmap read <$> formParamMaybe "diff"
-  t1file <- maybeTmpFile <$> formParamMaybe "t1file"
-  liftIO $ putStrLn $ show t1file
-  t2file <- maybeTmpFile <$> formParamMaybe "t2file"
-  t1t2file <- maybeTmpFile <$> formParamMaybe "t1t2file"
-  -- Get text for both files
   let t1Text = decodeUtf8 $ fileContent $ formFiles M.! "treebank1"
   let t2Text = decodeUtf8 $ fileContent $ formFiles M.! "treebank2"
-  -- Get pattern and replacement
-  queryTxt <- formParam "query"
-  replacementTxt <- formParam "replacement"
-  let patterns = if null queryTxt
-                 then [(DEPREL_ "root",DEPREL_ "root")]
-                 else parseQuery fieldVals queryTxt
-  let mreplacement = if null replacementTxt
-                     then Just $ CHANGES []
-                     else readMaybe replacementTxt
-  -- Convert to sentences
   let t1Sents = prsUDText $ T.unpack t1Text
-  -- If the treebank 2 is empty, fill with dummy sentences
+  -- if T2 is empty, fill with dummy sentences
   let t2Sents = if (not . null . T.unpack) t2Text 
                   then prsUDText $ T.unpack t2Text 
                   else Left $ repeat (tree2sentence dummyUDTree)
-  -- Align sentences
-  let sentPairs = (fromLeft [] t1Sents) `zip` (fromLeft [] t2Sents)
-  let treebank = 
-        map (\(s1,s2) -> (sentence2tree s1,sentence2tree s2)) sentPairs 
-  let alignments = map align sentPairs :: [[(UDTree,UDTree)]]
-  -- true bilingual matches
-  let bimatches = treebank `zip` map (match patterns) alignments
-  -- all matches (add treebank 1-only with dummy alignments)
-  let matches = map
-        (\bms@((t1,t2),ms) ->
-           let pattern = patterns !! 0
-           in if isMonolingual pattern
-                then ((t1,t2), ms ++ zip (filter 
-                  (\t -> not $ t `elem` (map fst ms))
-                  (matchingSubtrees (fst $ (pattern)) t1))
-                    (repeat $ dummyUDTree))
-              else bms)
-        bimatches
-  let matches' = -- apply replacements
-        map
-          (\(s,es) ->
-             (s,map (applyReplacement (fromJust $ mreplacement)) es))
-          (filter (\(_,ms) -> not $ null ms) matches) 
-  -- idk if "minimal" is actually a good way to do this, especially
-  -- for cases other than annotation conflict resolution (id text) 
-  let divergences = map (minimal . extractDivergences) alignments
+  let treebank = map 
+                    (bimap sentence2tree sentence2tree) 
+                    (fromLeft [] t1Sents `zip` fromLeft [] t2Sents)
+
+  mode <- read <$> formParam "mode"
+  diff <- maybe False read <$> formParamMaybe "diff"
+
+  t1File <- maybeTmpFile <$> formParamMaybe "t1file"
+  t2file <- maybeTmpFile <$> formParamMaybe "t2file"
+  t1t2file <- maybeTmpFile <$> formParamMaybe "t1t2file"
+
+  queryTxt <- formParam "query"
+  let patterns = if null queryTxt
+                 then [(DEPREL_ "root",DEPREL_ "root")]
+                 else parseQuery fieldVals queryTxt
+                
+  replTxt <- formParam "replacement"
+  let repl = fromJust $ if null replTxt
+                     then Just $ CHANGES []
+                     else readMaybe replTxt
+  
+  let matches = stundReplace (stundMatch treebank patterns) repl
+  
+  let divergences = map 
+        (map (bimap subtree2tree subtree2tree) . minimal . extractDivergences . concatMap align . snd) 
+        matches 
   let diws = -- UDWords to be marked if diff mode is on
         if diff then
           unzip $ map 
@@ -202,6 +215,7 @@ searchTreebanks = do
           )
         else
           ([],[])
+  liftIO $ print diws
   let (t1Col,t2Col) =
         unzip $ concatMap
           (\((t1,t2),ms) ->
@@ -216,21 +230,21 @@ searchTreebanks = do
                             TextMode -> highlin 
                                           (tree2sentence t1) 
                                           (tree2sentence m1) HTML
-                            CoNNLUMode -> (prt m1') ++ "\n"
+                            CoNNLUMode -> prt m1' ++ "\n"
                             TreeMode -> sentence2svgFragment m1',
                         case mode of
                            TextMode -> highlin 
                                         (tree2sentence t2) 
                                         (tree2sentence m2) HTML
-                           CoNNLUMode -> (prt m2') ++ "\n"
+                           CoNNLUMode -> prt m2' ++ "\n"
                            TreeMode -> sentence2svgFragment m2'))) 
                 ms)
-          matches'
+          matches
   t1t2Tmpfile <- liftIO $ 
                   writeMaybeTempFile t1t2file "t1-t2-.tsv" $ unlines $ map
       (\(t1,t2) -> t1 ++ "\t" ++ t2)
       ((map rmMarkup t1Col) `zip` (map rmMarkup t2Col))
-  t1Tmpfile <- liftIO $ writeMaybeTempFile t1file "t1-.htm" $ 
+  t1Tmpfile <- liftIO $ writeMaybeTempFile t1File "t1-.htm" $ 
                 case mode of { 
                   TextMode -> rmMarkup $ mkUpper $ unlines t1Col ; 
                   _ -> rmMarkup $ unlines t1Col }
@@ -287,9 +301,7 @@ searchTreebanks = do
       maybeTmpFile (Just s)
         | L.isPrefixOf tmpPath s = Just s
         | otherwise = Nothing
-      applyReplacement r (e1,e2) =
-        (fst $ replacementsWithUDPattern r e1,
-         fst $ replacementsWithUDPattern r e2)
+
 
 -- Downloads a temp file
 downloadTmpFile :: ActionM ()
@@ -325,7 +337,7 @@ main =
         get "/" $ handleRoot
         get "/index.html" $ handleRoot
         get "/check_query" $ checkQuery
-        get "/check_replacement" $ checkReplacement
+        get "/check_repls" $ checkReplacement
         post "/check_conll" $ checkConll
         post "/parse_plaintext" $ parsePlaintext
         post "/search_treebanks" $ searchTreebanks
