@@ -135,154 +135,161 @@ parsePlaintext =
     
 -- Search the treebank(s) using the query and replacement parameters
 searchTreebanks :: ActionM ()
-searchTreebanks =
-  do
-    -- Get a map of all uploaded files from filename to file info
-    formFiles <- M.fromList <$> files
-    -- Get the file mode
-    mode <- read <$> formParam "mode"
-    -- By default do not highlight "diff"
-    diff <- fromMaybe False <$> fmap read <$> formParamMaybe "diff"
-    t1file <- maybeTmpFile <$> formParamMaybe "t1file"
-    liftIO $ putStrLn $ show t1file
-    t2file <- maybeTmpFile <$> formParamMaybe "t2file"
-    t1t2file <- maybeTmpFile <$> formParamMaybe "t1t2file"
-    -- Get text for both files
-    let t1Text = decodeUtf8 $ fileContent $ formFiles M.! "treebank1"
-    let t2Text = decodeUtf8 $ fileContent $ formFiles M.! "treebank2"
-    -- Get pattern and replacement
-    queryTxt <- formParam "query"
-    replacementTxt <- formParam "replacement"
-    let patterns = if null queryTxt
-                   then [(DEPREL_ "root",DEPREL_ "root")]
-                   else parseQuery fieldVals queryTxt
-    let mreplacement = if null replacementTxt
-                       then Just $ CHANGES []
-                       else readMaybe replacementTxt
-    -- Convert to sentences
-    let t1Sents = prsUDText $ T.unpack t1Text
-    -- If the treebank 2 is empty, fill with dummy sentences
-    -- (better than using the treebank 1 again, because alignment complexity
-    -- will be negligible if the trees are empty) 
-    let t2Sents = if (not . null . T.unpack) t2Text 
-                    then prsUDText $ T.unpack t2Text 
-                    else Left $ repeat (tree2sentence dummyUDTree)
-    -- Align sentences
-    let sentPairs = (fromLeft [] t1Sents) `zip` (fromLeft [] t2Sents)
-    let treebank = 
-          map (\(s1,s2) -> (sentence2tree s1,sentence2tree s2)) sentPairs 
-    let alignments = map align sentPairs :: [[(UDTree,UDTree)]]
-    -- true bilingual matches
-    let bimatches = treebank `zip` map (match patterns) alignments
-    -- all matches (add treebank 1-only with dummy alignments)
-    let matches = map
-          (\bms@((t1,t2),ms) ->
-             let pattern = patterns !! 0
-             in if isMonolingual pattern
-                  then ((t1,t2), ms ++ zip (filter 
-                    (\t -> not $ t `elem` (map fst ms))
-                    (matchingSubtrees (fst $ (pattern)) t1))
-                      (repeat $ dummyUDTree))
-                else bms)
-          bimatches
-    let matches' = -- apply replacements
-          map
-            (\(s,es) ->
-               (s,map (applyReplacement (fromJust $ mreplacement)) es))
-            (filter (\(_,ms) -> not $ null ms) matches) 
-    -- idk if "minimal" is actually a good way to do this, especially
-    -- for cases other than annotation conflict resolution (id text) 
-    let divergences = map (minimal . extractDivergences) alignments
-    let diws = -- UDWords to be marked if diff mode is on
-          if diff then
-            unzip $ map 
-            (\(wws1,wws2) -> 
-               (map (id2int . udID) $ rmDuplicates $ concat wws1, map (id2int . udID) $ rmDuplicates $ concat wws2)) 
-            (map 
-              unzip 
-              (map (map (\(t1,t2) -> (allNodes t1, allNodes t2))) divergences)
-            )
-          else
-            ([],[])
-    --let matches'' = 
-    --      if diff && isJust t2file
-    --        then undefined --TODO:
-    --        else matches'
-    let (t1Col,t2Col) =
-          unzip $ concatMap
-            (\((t1,t2),ms) ->
-                map
-                  (\(m1,m2) ->
-                      let m1' =
-                            if m1 == dummyUDTree
-                            then tree2sentence m1
-                            else tree2sentence $ subtree2tree m1
-                          m2' = tree2sentence $ subtree2tree m2
-                      in ((case mode of
-                              TextMode -> highlin (tree2sentence t1) (tree2sentence m1) HTML
-                              CoNNLUMode -> (prt m1') ++ "\n"
-                              TreeMode -> sentence2svgFragment m1',
-                          case mode of
-                             TextMode -> highlin (tree2sentence t2) (tree2sentence m2) HTML
-                             CoNNLUMode -> (prt m2') ++ "\n"
-                             TreeMode -> sentence2svgFragment m2'))) 
-                  ms)
-            matches'
-    t1t2Tmpfile <- liftIO $ writeMaybeTempFile t1t2file "t1-t2-.tsv" $ unlines $ map
-        (\(t1,t2) -> t1 ++ "\t" ++ t2)
-        ((map rmMarkup t1Col) `zip` (map rmMarkup t2Col))
-    t1Tmpfile <- liftIO $ writeMaybeTempFile t1file "t1-.htm" $ case mode of { TextMode -> rmMarkup $ mkUpper $ unlines t1Col ; _ -> rmMarkup $ unlines t1Col }
-    t2Tmpfile <- liftIO $ writeMaybeTempFile t2file "t2-.htm" $ case mode of { TextMode -> rmMarkup $ mkUpper $ unlines t2Col ; _ -> rmMarkup $ unlines t2Col }
-    json $ if (not . null . T.unpack) t2Text  
-      then Result { -- parallel treebank
-        t1 = t1Col, 
-        t2 = t2Col, 
-        h1 = fst diws,
-        h2 = snd diws,
-        t1file = Just t1Tmpfile, 
-        t2file = Just t2Tmpfile, 
-        t1t2file = Just t1t2Tmpfile }
-      else Result { -- single treebank
-        t1 = t1Col,
-        t2 = [],
-        h1 = [],
-        h2 = [],
-        t1file = Just t1Tmpfile,
-        t2file = Nothing,
-        t1t2file = Nothing }
-      where
-        -- undo HTML injection into SVG, replace with proper attribute
-        rmMarkup s = replace "</b>" "" $ replace "<b>" "" s
-        -- replace <b>text</b> markup by uppercase TEXT
-        mkUpper s
-          | L.isPrefixOf "<b>" s = mkUpper' $ drop 3 s
-          | null s = ""
-          | otherwise = head s:mkUpper (tail s)
-          where
-            mkUpper' s
-              | L.isPrefixOf "</b>" s = mkUpper $ drop 4 s
-              | otherwise = toUpper (head s):mkUpper' (tail s)
-        -- Writes the content either to a given file if it exists or to a new temporary file otherwise
-        writeMaybeTempFile :: Maybe FilePath -> String -> String -> IO FilePath
-        writeMaybeTempFile maybeFile tmpFilePattern content =
-          if isJust maybeFile then
-              do
-                let fn = fromJust maybeFile
-                writeFile fn content
-                return fn
-          else
-            writeTempFile tmpPath tmpFilePattern content
-        -- Checks the content of a Maybe String and make it Nothing if the String is empty or invalid
-        maybeTmpFile :: Maybe String -> Maybe FilePath
-        maybeTmpFile Nothing = Nothing
-        maybeTmpFile (Just []) = Nothing
-        -- Check if it is a file within the tmpPath
-        maybeTmpFile (Just s)
-          | L.isPrefixOf tmpPath s = Just s
-          | otherwise = Nothing
-        applyReplacement r (e1,e2) =
-          (fst $ replacementsWithUDPattern r e1,
-           fst $ replacementsWithUDPattern r e2)
+searchTreebanks = do
+  -- Get a map of all uploaded files from filename to file info
+  formFiles <- M.fromList <$> files
+  -- Get the file mode
+  mode <- read <$> formParam "mode"
+  -- By default do not highlight "diff"
+  diff <- fromMaybe False <$> fmap read <$> formParamMaybe "diff"
+  t1file <- maybeTmpFile <$> formParamMaybe "t1file"
+  liftIO $ putStrLn $ show t1file
+  t2file <- maybeTmpFile <$> formParamMaybe "t2file"
+  t1t2file <- maybeTmpFile <$> formParamMaybe "t1t2file"
+  -- Get text for both files
+  let t1Text = decodeUtf8 $ fileContent $ formFiles M.! "treebank1"
+  let t2Text = decodeUtf8 $ fileContent $ formFiles M.! "treebank2"
+  -- Get pattern and replacement
+  queryTxt <- formParam "query"
+  replacementTxt <- formParam "replacement"
+  let patterns = if null queryTxt
+                 then [(DEPREL_ "root",DEPREL_ "root")]
+                 else parseQuery fieldVals queryTxt
+  let mreplacement = if null replacementTxt
+                     then Just $ CHANGES []
+                     else readMaybe replacementTxt
+  -- Convert to sentences
+  let t1Sents = prsUDText $ T.unpack t1Text
+  -- If the treebank 2 is empty, fill with dummy sentences
+  let t2Sents = if (not . null . T.unpack) t2Text 
+                  then prsUDText $ T.unpack t2Text 
+                  else Left $ repeat (tree2sentence dummyUDTree)
+  -- Align sentences
+  let sentPairs = (fromLeft [] t1Sents) `zip` (fromLeft [] t2Sents)
+  let treebank = 
+        map (\(s1,s2) -> (sentence2tree s1,sentence2tree s2)) sentPairs 
+  let alignments = map align sentPairs :: [[(UDTree,UDTree)]]
+  -- true bilingual matches
+  let bimatches = treebank `zip` map (match patterns) alignments
+  -- all matches (add treebank 1-only with dummy alignments)
+  let matches = map
+        (\bms@((t1,t2),ms) ->
+           let pattern = patterns !! 0
+           in if isMonolingual pattern
+                then ((t1,t2), ms ++ zip (filter 
+                  (\t -> not $ t `elem` (map fst ms))
+                  (matchingSubtrees (fst $ (pattern)) t1))
+                    (repeat $ dummyUDTree))
+              else bms)
+        bimatches
+  let matches' = -- apply replacements
+        map
+          (\(s,es) ->
+             (s,map (applyReplacement (fromJust $ mreplacement)) es))
+          (filter (\(_,ms) -> not $ null ms) matches) 
+  -- idk if "minimal" is actually a good way to do this, especially
+  -- for cases other than annotation conflict resolution (id text) 
+  let divergences = map (minimal . extractDivergences) alignments
+  let diws = -- UDWords to be marked if diff mode is on
+        if diff then
+          unzip $ map 
+          (\(wws1,wws2) -> 
+             (map (id2int . udID) $ rmDuplicates $ concat wws1, 
+              map (id2int . udID) $ rmDuplicates $ concat wws2)) 
+          (map 
+            unzip 
+            (map (map (\(t1,t2) -> (allNodes t1, allNodes t2))) divergences)
+          )
+        else
+          ([],[])
+  let (t1Col,t2Col) =
+        unzip $ concatMap
+          (\((t1,t2),ms) ->
+              map
+                (\(m1,m2) ->
+                    let m1' =
+                          if m1 == dummyUDTree
+                          then tree2sentence m1
+                          else tree2sentence $ subtree2tree m1
+                        m2' = tree2sentence $ subtree2tree m2
+                    in ((case mode of
+                            TextMode -> highlin 
+                                          (tree2sentence t1) 
+                                          (tree2sentence m1) HTML
+                            CoNNLUMode -> (prt m1') ++ "\n"
+                            TreeMode -> sentence2svgFragment m1',
+                        case mode of
+                           TextMode -> highlin 
+                                        (tree2sentence t2) 
+                                        (tree2sentence m2) HTML
+                           CoNNLUMode -> (prt m2') ++ "\n"
+                           TreeMode -> sentence2svgFragment m2'))) 
+                ms)
+          matches'
+  t1t2Tmpfile <- liftIO $ 
+                  writeMaybeTempFile t1t2file "t1-t2-.tsv" $ unlines $ map
+      (\(t1,t2) -> t1 ++ "\t" ++ t2)
+      ((map rmMarkup t1Col) `zip` (map rmMarkup t2Col))
+  t1Tmpfile <- liftIO $ writeMaybeTempFile t1file "t1-.htm" $ 
+                case mode of { 
+                  TextMode -> rmMarkup $ mkUpper $ unlines t1Col ; 
+                  _ -> rmMarkup $ unlines t1Col }
+  t2Tmpfile <- liftIO $ writeMaybeTempFile t2file "t2-.htm" $ 
+                case mode of { 
+                  TextMode -> rmMarkup $ mkUpper $ unlines t2Col ; 
+                  _ -> rmMarkup $ unlines t2Col }
+  json $ if (not . null . T.unpack) t2Text  
+    then Result { -- parallel treebank
+      t1 = t1Col, 
+      t2 = t2Col, 
+      h1 = fst diws,
+      h2 = snd diws,
+      t1file = Just t1Tmpfile, 
+      t2file = Just t2Tmpfile, 
+      t1t2file = Just t1t2Tmpfile }
+    else Result { -- single treebank
+      t1 = t1Col,
+      t2 = [],
+      h1 = [],
+      h2 = [],
+      t1file = Just t1Tmpfile,
+      t2file = Nothing,
+      t1t2file = Nothing }
+    where
+      -- undo HTML injection into SVG, replace with proper attribute
+      rmMarkup s = replace "</b>" "" $ replace "<b>" "" s
+      -- replace <b>text</b> markup by uppercase TEXT
+      mkUpper s
+        | L.isPrefixOf "<b>" s = mkUpper' $ drop 3 s
+        | null s = ""
+        | otherwise = head s:mkUpper (tail s)
+        where
+          mkUpper' s
+            | L.isPrefixOf "</b>" s = mkUpper $ drop 4 s
+            | otherwise = toUpper (head s):mkUpper' (tail s)
+      -- Writes the content either to a given file if it exists or to a new 
+      -- temporary file otherwise
+      writeMaybeTempFile :: Maybe FilePath -> String -> String -> IO FilePath
+      writeMaybeTempFile maybeFile tmpFilePattern content =
+        if isJust maybeFile then
+            do
+              let fn = fromJust maybeFile
+              writeFile fn content
+              return fn
+        else
+          writeTempFile tmpPath tmpFilePattern content
+      -- Checks the content of a Maybe String and make it Nothing if the 
+      -- String is empty or invalid
+      maybeTmpFile :: Maybe String -> Maybe FilePath
+      maybeTmpFile Nothing = Nothing
+      maybeTmpFile (Just []) = Nothing
+      -- Check if it is a file within the tmpPath
+      maybeTmpFile (Just s)
+        | L.isPrefixOf tmpPath s = Just s
+        | otherwise = Nothing
+      applyReplacement r (e1,e2) =
+        (fst $ replacementsWithUDPattern r e1,
+         fst $ replacementsWithUDPattern r e2)
 
 -- Downloads a temp file
 downloadTmpFile :: ActionM ()
