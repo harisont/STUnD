@@ -538,7 +538,7 @@ async function queryData(formData) {
 	}
 	// Display all the results
 	for (var index = 0; index < response.t1.length; index++) {
-	    resultsDiv.append(createLine(index + 1, response.t1[index], response.h1[index], response.t2[index],response.h1[index]));
+	    resultsDiv.append(createLine(index + 1, response.t1[index], response.h1[index], response.t2[index],response.h2[index]));
 	}
     }
     // Hide the overlay when we are done
