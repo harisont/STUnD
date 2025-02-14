@@ -128,12 +128,6 @@ checkConll =
     else
       json (Status "invalid" "input is not in valid CoNLL-U format" $ Just $ concat $ rights results)
 
--- Parse an uploaded plain text file to CONLL using UDPipe API
-parsePlaintext :: ActionM ()
-parsePlaintext =
-  do
-    text "Not implemented yet"
-
 -- | A match is a pair that associates a sentence pair with a list of 
 -- alignments matching the query (could/should be moved to L2-UD; the match
 -- function should return this directly)
@@ -339,6 +333,5 @@ main =
         get "/check_query" $ checkQuery
         get "/check_repls" $ checkReplacement
         post "/check_conll" $ checkConll
-        post "/parse_plaintext" $ parsePlaintext
         post "/search_treebanks" $ searchTreebanks
         get "/tmp_file/" $ downloadTmpFile
