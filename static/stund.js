@@ -550,10 +550,11 @@ async function queryData(formData) {
   Highlights divergences in the results
 */
 function highlight(element, indices) {
+    const indexSet = Array.from(new Set(indices))
     if (document.getElementById("textMode").checked) {
 	const boldNodes = Array.from(element.getElementsByTagName("b"))
-	for (const i in indices) {
-	    const child = boldNodes[indices[i]-1]
+	for (const i in indexSet) {
+	    const child = boldNodes[indexSet[i]-1]
 	    var mark = document.createElement("span")
 	    mark.className = "mark"
 	    child.parentElement.replaceChild(mark,child)
@@ -562,14 +563,14 @@ function highlight(element, indices) {
     }
     else if (document.getElementById("conllMode").checked) {
 	var lines = element.innerHTML.split("\n")
-	for (const i in indices) {
-	    lines[indices[i]-1]="<span class=\"mark\">" + lines[indices[i]-1] + "</span>"
+	for (const i in indexSet) {
+	    lines[indexSet[i]-1]="<span class=\"mark\">" + lines[indexSet[i]-1] + "</span>"
 	}
 	element.innerHTML = lines.join("\n")
     }
     else { // Tree mode
-	for (const i in indices) {
-	    element.getElementsByTagName("text")[indices[i]-1].style.fill = "#9449D1"
+	for (const i in indexSet) {
+	    element.getElementsByTagName("text")[indexSet[i]-1].style.fill = "#9449D1"
 	}
     }
 }
