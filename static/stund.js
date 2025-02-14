@@ -557,7 +557,7 @@ function highlight(element, indices) {
 	    var mark = document.createElement("span")
 	    mark.className = "mark"
 	    child.parentElement.replaceChild(mark,child)
-	    mark.innerHTML = child.outerHTML + " "
+	    mark.innerHTML = child.outerHTML
 	}
     }
     else if (document.getElementById("conllMode").checked) {
