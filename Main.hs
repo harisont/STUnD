@@ -194,8 +194,8 @@ searchTreebanks = do
   
   let matches = stundReplace (stundMatch treebank patterns) repl
   
-  let divergences = map 
-        (minimal . extractDivergences . concatMap align . map (bimap subtree2tree subtree2tree) . snd) 
+  let divergences = concatMap 
+        (map minimal . map extractDivergences . map align . map (bimap subtree2tree subtree2tree) . snd) 
         matches 
   let diws = -- UDWords to be marked if diff mode is on
         if diff then
