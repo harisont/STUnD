@@ -551,12 +551,13 @@ async function queryData(formData) {
 */
 function highlight(element, indices) {
     if (document.getElementById("textMode").checked) {
+	const boldNodes = Array.from(element.getElementsByTagName("b"))
 	for (const i in indices) {
+	    const child = boldNodes[indices[i]-1]
 	    var mark = document.createElement("span")
 	    mark.className = "mark"
-	    mark.append(element.children[indices[i]-1])
-	    mark.append(document.createTextNode(" "))
-	    element.insertBefore(mark,element.children[indices[i]-1])
+	    child.parentElement.replaceChild(mark,child)
+	    mark.innerHTML = child.outerHTML + " "
 	}
     }
     else if (document.getElementById("conllMode").checked) {
