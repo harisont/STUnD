@@ -570,8 +570,34 @@ function highlight(element, indices) {
     }
     else { // Tree mode
 	for (const i in indexSet) {
-	    element.getElementsByTagName("text")[indexSet[i]-1].style.fill = "#9449D1"
-	}
+		const lines = element.getElementsByTagName("line")
+		const line = lines[indexSet[i]-1]
+
+		// forms
+		element.getElementsByTagName("text")[indexSet[i]-1].style.fill = "#9449D1"
+		
+		// upos
+		element.getElementsByTagName("text")[indexSet[i]-1+lines.length].style.fill = "#9449D1"
+
+		// deprels:
+
+		// label
+		const deplabel = element.getElementsByTagName("text")[indexSet[i]-1+2*lines.length]
+	    deplabel.style.fill = "#9449D1" 
+
+		// arrow
+		const arrowPath = deplabel.previousElementSibling
+		arrowPath.style.fill = "#9449D1"
+		const arrowLine = arrowPath.previousElementSibling
+		arrowLine.setAttribute("stroke", "#9449D1")
+		arrowLine.style.fill = "#9449D1"
+
+		// arc
+		if (deplabel.innerHTML != "root") {
+			const arc = arrowLine.previousElementSibling
+			arc.setAttribute("stroke", "#9449D1")
+			}
+		}
     }
 }
 
