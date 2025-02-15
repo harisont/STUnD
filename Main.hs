@@ -39,7 +39,7 @@ import Web.Scotty
 import qualified Web.Scotty as S
 import Network.Wai.Middleware.RequestLogger
 import Network.Wai.Middleware.Static
-import Network.Wai.Parse (fileName, fileContent, defaultParseRequestBodyOptions)
+import Network.Wai.Parse (fileName,fileContent,defaultParseRequestBodyOptions)
 import Network.HTTP.Types.Status (mkStatus)
 import System.Directory
 import System.IO.Temp
@@ -171,9 +171,9 @@ searchTreebanks = do
   let t2Sents = if (not . null . T.unpack) t2Text 
                   then prsUDText $ T.unpack t2Text 
                   else Left $ repeat (tree2sentence dummyUDTree)
-  let treebank = map 
-                    (bimap sentence2tree sentence2tree) 
-                    (fromLeft [] t1Sents `zip` fromLeft [] t2Sents)
+  let treebank = map   
+                  (bimap sentence2tree sentence2tree) 
+                  (fromLeft [] t1Sents `zip` fromLeft [] t2Sents)
 
   mode <- read <$> formParam "mode"
   diff <- maybe False read <$> formParamMaybe "diff"
@@ -194,22 +194,14 @@ searchTreebanks = do
   
   let matches = stundReplace (stundMatch treebank patterns) repl
   
-  let divergences = concatMap 
-        (map minimal . map extractDivergences . map align . map (bimap subtree2tree subtree2tree) . snd) 
-        matches 
-  let diws = -- UDWords to be marked if diff mode is on
-        if diff then
-          unzip $ map 
-          (\(wws1,wws2) -> 
-             (map (id2int . udID) $ rmDuplicates $ concat wws1, 
-              map (id2int . udID) $ rmDuplicates $ concat wws2)) 
-          (map 
-            unzip 
-            (map (map (\(t1,t2) -> (allNodes t1, allNodes t2))) divergences)
-          )
-        else
-          ([],[])
-  liftIO $ print diws
+  let divergences = if diff -- skip if not in diff mode to save time
+        then concatMap (map 
+          (((minimal . extractDivergences) -- 4. extract "minimal" divergences
+            . align) -- 3. re-align the adjusted matching subtrees
+            . bimap subtree2tree subtree2tree) -- 2. adjust indices
+            . snd) -- 1. take matching subtrees
+          matches 
+        else []
   let (t1Col,t2Col) =
         unzip $ concatMap
           (\((t1,t2),ms) ->
@@ -246,12 +238,19 @@ searchTreebanks = do
                 case mode of { 
                   TextMode -> rmMarkup $ mkUpper $ unlines t2Col ; 
                   _ -> rmMarkup $ unlines t2Col }
+
+  -- transform divergences into indices needed to highlight words in diff
+  -- mode in the frontend
+  let divIndices = unzip $ map 
+        ((bimap words2ints words2ints . unzip) -- 2. UDWords -> udIDs -> Ints
+        . map (bimap allNodes allNodes)) -- 1. aligned UDTree -> [UDWords]
+        divergences                  
   json $ if (not . null . T.unpack) t2Text  
     then Result { -- parallel treebank
       t1 = t1Col, 
       t2 = t2Col, 
-      h1 = fst diws,
-      h2 = snd diws,
+      h1 = fst divIndices,
+      h2 = snd divIndices,
       t1file = Just t1Tmpfile, 
       t2file = Just t2Tmpfile, 
       t1t2file = Just t1t2Tmpfile }
@@ -264,6 +263,7 @@ searchTreebanks = do
       t2file = Nothing,
       t1t2file = Nothing }
     where
+      words2ints = map (id2int . udID) . rmDuplicates . concat
       -- undo HTML injection into SVG, replace with proper attribute
       rmMarkup s = replace "</b>" "" $ replace "<b>" "" s
       -- replace <b>text</b> markup by uppercase TEXT
