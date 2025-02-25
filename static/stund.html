@@ -9,6 +9,7 @@
 <body onload="pageLoad()">
   <script src="langid/langid-model-full.js"></script>
   <script src="langid/langid.js"></script>
+  <script src="ud-iso-languages.js"></script>
   <script src="stund.js"></script>
   <form id="searchForm" enctype="multipart/form-data" class="unselectable">
     <div width="100%">
@@ -50,7 +51,7 @@
       </span>
     </div>
     <div id="bardiv">
-      <div id="modebar" class="bar">
+      <div id="modebar" class="bar" onchange="resetTempFiles()">
         <span>
           <label for="mode">Mode</label>
         </span>
@@ -87,7 +88,7 @@
       <div id="buttonbar" class="bar">
         <span>
           <input type="reset" value="Reset" />
-          <input type="button" value="Search" onclick="sendFiles()" />
+          <input type="button" value="Search" id="sendDataButton" onclick="sendFiles()" />
         </span>
       </div>
     </div>

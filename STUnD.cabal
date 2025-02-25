@@ -17,6 +17,7 @@ executable stund-gui
         base,
         MissingH,
         text,
+        string-conversions,
         pretty,
         containers,
         temporary,

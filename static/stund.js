@@ -59,6 +59,14 @@ function resetAllErrors() {
 }
 
 /*
+  Resets the temp files when the editing mode is changed
+*/
+function resetTempFiles() {
+    document.getElementById("t1file").value = null
+    document.getElementById("t2file").value = null
+}
+
+/*
   Makes all fields in a CONLL treebank editable an manage button stuff
 */
 function makeEditable(treebank) {
@@ -283,11 +291,11 @@ function loadFromStore(category) {
 
 
 /*
-  Send form on press of the return key
+  Send form on press of the return key. Same as pressing the button
 */
 function handleReturnKey(e) {
     if(e && e.keyCode == 13) {
-	sendData();
+	document.getElementById("sendDataButton").click()
     }
 }
 
@@ -332,11 +340,12 @@ async function sendFiles() {
 async function parsePlaintext(treebank) {
     // Try to determine the language
     var lang = "";
-    // name starts with XX_ where XX is a language code => we are done
-    if (treebank.name.match("^[a-z]{2}_")) {
-	lang = treebank.name.substr(0,2);
+    // name starts with XX_ or XXX_ where XX or XXX is a language code => we are done
+    var match = new RegExp("^([a-z]{2,3})_").exec(treebank.name);
+    if (match) {
+	lang = match[1];
     }
-    // We have to guess the language
+    // Otherwise we have to guess the language
     else {
 	// Use langid.js (https://github.com/saffsd/langid.js) to identify the language
 	showOverlay("identifying language...");
@@ -345,37 +354,44 @@ async function parsePlaintext(treebank) {
     }
     // If we got a language we can use UDPipe for processing
     if (lang != "") {
-	
-	// Set parameters for UDPipe
-	var udopipeData = new FormData();
-	udopipeData.set("model", lang);
-	udopipeData.set("tokenizer", "");
-	udopipeData.set("tagger", "");
-	udopipeData.set("parser", "");
-	udopipeData.set("data", await treebank.text());
-	showOverlay("parsing via UDPipe...");
-	var treebankData = await fetch("https://lindat.mff.cuni.cz/services/udpipe/api/process", {
-	    method: "POST",
-	    body: udopipeData,
-	})
-	    .then((response) => {
-		hideOverlay();
-		// Check response status
-		if (response.status != 200) {
-		    // Create error message
-		    response.text().then((txt) => {
-			var msg = "Error with UDPipe: " + txt;
-			addErrorMessage(msg);
-		    });
-		    // Create fake empty JSON
-		    return {"result": ""};
-		}
-		else {
-		    // If no problem with parsing, return as JSON
-		    return response.json();
-		}
-	    });
-	return treebankData.result;
+	// Check if we have a model for the language
+	if (!UDlangCodes.includes(lang)) {
+	    addErrorMessage("Language " + lang + " not covered by UDPipe");
+	    return "";
+	}
+	else {
+	    // Set parameters for UDPipe
+	    var udpipeData = new FormData();
+	    udpipeData.set("model", langCode2UDPipeModel[lang]);
+	    udpipeData.set("input","horizontal");
+	    udpipeData.set("tokenizer", "presegmented");
+	    udpipeData.set("tagger", "");
+	    udpipeData.set("parser", "");
+	    udpipeData.set("data", await treebank.text());
+	    showOverlay("parsing via UDPipe...");
+	    var treebankData = await fetch("https://lindat.mff.cuni.cz/services/udpipe/api/process", {
+		method: "POST",
+		body: udpipeData,
+	    })
+		.then((response) => {
+		    // Check response status
+		    if (response.status != 200) {
+			// Create error message
+			response.text().then((txt) => {
+			    var msg = "Error with UDPipe: " + txt;
+			    addErrorMessage(msg);
+			});
+			// Create fake empty JSON
+			return {"result": ""};
+		    }
+		    else {
+			// If no problem with parsing, return as JSON
+			return response.json();
+		    }
+		});
+	    hideOverlay();
+	    return treebankData.result;
+	}
     }	
 }
 
@@ -425,17 +441,35 @@ async function resendEditedData() {
     var newTreebank1 = []
     var newTreebank2 = []
     for (const e of Array.from(document.getElementsByClassName("t1resultCell"))) {
-	newTreebank1.push(e.textContent);
+	for (const ee of Array.from(e.getElementsByClassName("txtdiv"))) {
+	    newTreebank1.push(ee.textContent)
+	}
     }
     for (const e of Array.from(document.getElementsByClassName("t2resultCell"))) {
-	newTreebank2.push(e.textContent);
+	for (const ee of Array.from(e.getElementsByClassName("txtdiv"))) {
+	    newTreebank2.push(ee.textContent)
+	}
     }
     // Update the treebanks
     formData.delete("treebank1");
-    formData.set("treebank1", new File(newTreebank1,"treebank1tmp.conllu"))
     formData.delete("treebank2");
-    formData.set("treebank2", new File(newTreebank2,"treebank2tmp.conllu"))
+    var newFile1 = new File(newTreebank1,"editedTreebank1.conllu")
+    var newFile2 = new File(newTreebank2,"editedTreebank2.conllu")
+    formData.set("treebank1", newFile1)
+    formData.set("treebank2", newFile2)
     queryData(formData);
+    // Potentially replace previous files if they have been edited
+    let container = new DataTransfer();
+    if (document.getElementById("editedTreebank1").value == "true") {
+	container.items.add(newFile1);
+	document.getElementById("treebank1").files=container.files
+    }
+    if (document.getElementById("editedTreebank2").value == "true") {
+	container.items.clear()
+	container.items.add(newFile2);
+	document.getElementById("treebank2").files=container.files
+    }
+    // Reset editable
     resetEditable();
 }
 
