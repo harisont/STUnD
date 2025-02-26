@@ -194,7 +194,7 @@ function createTmpLink(file, text) {
 
   Returns a new <div> element
 */
-function createLine(n,leftField,rightField) {
+function createLine(n,leftField,leftHighlight,rightField,rightHighlight) {
     var lineDiv = document.createElement("div"),
 	leftSpan = document.createElement("span"),
 	rightSpan = document.createElement("span");
@@ -215,11 +215,13 @@ function createLine(n,leftField,rightField) {
     rightSpan.appendChild(rightNumDiv);
     leftNumDiv.innerHTML=n;
     leftTxtDiv.innerHTML=leftField;
+    highlight(leftTxtDiv,leftHighlight)
     lineDiv.append(leftSpan);
     if (rightField != undefined) {
 	rightSpan.classList.add("resultCell")
 	rightSpan.classList.add("t2resultCell")
 	rightTxtDiv.innerHTML=rightField;
+	highlight(rightTxtDiv,rightHighlight)
     rightNumDiv.innerHTML=n;
 	lineDiv.append(rightSpan);
     }
@@ -556,10 +558,10 @@ async function queryData(formData) {
 	    resultsDiv.style.fontFamily="monospace,monospace";
 	    // Show the "editable" checkbox
 	    document.getElementById("t1editableSpan").style.setProperty("display", "inline-block");
-        document.getElementById("t1editableSpan").style.setProperty("font-family", "sans-serif");
+            document.getElementById("t1editableSpan").style.setProperty("font-family", "sans-serif");
 	    if (!(response.t2[0] == undefined)) {
 		document.getElementById("t2editableSpan").style.setProperty("display", "inline-block");
-        document.getElementById("t2editableSpan").style.setProperty("font-family", "sans-serif");
+		document.getElementById("t2editableSpan").style.setProperty("font-family", "sans-serif");
 	    }
 	}
 	else {
@@ -570,11 +572,69 @@ async function queryData(formData) {
 	}
 	// Display all the results
 	for (var index = 0; index < response.t1.length; index++) {
-	    resultsDiv.append(createLine(index + 1, response.t1[index],response.t2[index]));
+	    resultsDiv.append(createLine(index + 1, response.t1[index], response.h1[index], response.t2[index],response.h2[index]));
 	}
     }
     // Hide the overlay when we are done
     hideOverlay();
+}
+
+
+/*
+  Highlights divergences in the results
+*/
+function highlight(element, indices) {
+    const indexSet = Array.from(new Set(indices))
+    if (document.getElementById("textMode").checked) {
+	const boldNodes = Array.from(element.getElementsByTagName("b"))
+	for (const i in indexSet) {
+	    if (indexSet[i] > 0 && indexSet[i] <= boldNodes.length) {
+		const child = boldNodes[indexSet[i]-1]
+		var mark = document.createElement("span")
+		mark.className = "mark"
+		child.parentElement.replaceChild(mark,child)
+		mark.innerHTML = child.outerHTML
+	    }
+	}
+    }
+    else if (document.getElementById("conllMode").checked) {
+	var lines = element.innerHTML.split("\n")
+	for (const i in indexSet) {
+	    lines[indexSet[i]-1]="<span class=\"mark\">" + lines[indexSet[i]-1] + "</span>"
+	}
+	element.innerHTML = lines.join("\n")
+    }
+    else { // Tree mode
+	for (const i in indexSet) {
+		const lines = element.getElementsByTagName("line")
+		const line = lines[indexSet[i]-1]
+
+		// forms
+		element.getElementsByTagName("text")[indexSet[i]-1].style.fill = "#9449D1"
+		
+		// upos
+		element.getElementsByTagName("text")[indexSet[i]-1+lines.length].style.fill = "#9449D1"
+
+		// deprels:
+
+		// label
+		const deplabel = element.getElementsByTagName("text")[indexSet[i]-1+2*lines.length]
+	    deplabel.style.fill = "#9449D1" 
+
+		// arrow
+		const arrowPath = deplabel.previousElementSibling
+		arrowPath.style.fill = "#9449D1"
+		const arrowLine = arrowPath.previousElementSibling
+		arrowLine.setAttribute("stroke", "#9449D1")
+		arrowLine.style.fill = "#9449D1"
+
+		// arc
+		if (deplabel.innerHTML != "root") {
+			const arc = arrowLine.previousElementSibling
+			arc.setAttribute("stroke", "#9449D1")
+			}
+		}
+    }
 }
 
 /*

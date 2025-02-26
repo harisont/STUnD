@@ -83,8 +83,10 @@ body {
     padding-bottom: 0.15%;
 }
 
-mark {
-    background: #FFD567
+.mark {
+    color:#9449D1;
+    fill:#9449D1;
+    display: inline;
 }
 
 .editDiv{
