@@ -18,7 +18,7 @@
           <label for="treebank1">Treebank 1</label>
         </span>
         <span id="t1span">
-          <input id="treebank1" name="treebank1" type="file" accept=".conll, .conllu, .txt" oninput="document.getElementById('checkedTreebank1').value='false'" />
+          <input id="treebank1" name="treebank1" type="file" accept=".conll, .conllu, .txt" oninput="changedTreebankFileInput('1')" />
         </span>
       </span>
       <span class="treebank">
@@ -26,7 +26,7 @@
           <label for="treebank2">Treebank 2 (optional)</label>
         </span>
         <span id="t2span">
-          <input id="treebank2" name="treebank2" type="file" accept=".conll, .conllu, .txt" oninput="document.getElementById('checkedTreebank2').value='false'" />
+          <input id="treebank2" name="treebank2" type="file" accept=".conll, .conllu, .txt" oninput="changedTreebankFileInput('2')" />
         </span>
       </span>
     </div>
