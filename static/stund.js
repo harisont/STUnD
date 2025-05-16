@@ -5,9 +5,9 @@
 */
 function pageLoad() {
     // Load saved queries from local storage
-    loadFromStore("queries");
+    loadQueriesFromStore("queries");
     // Load saved queries from local storage
-    loadFromStore("replacements");
+    loadQueriesFromStore("replacements");
 }
 
 /*
@@ -248,7 +248,7 @@ function handleFetchError(error) {
 /*
   Stores the query in the local storage
 */
-function saveToStore(category, value) {
+function saveQueriesToStore(category, value) {
     // Get queries from local storage
     var lists = JSON.parse(localStorage.savedLists);
     // Initialize new list if category is missing
@@ -270,7 +270,7 @@ function saveToStore(category, value) {
 /*
   Load stored lists from local storage
 */
-function loadFromStore(category) {
+function loadQueriesFromStore(category) {
     // Load queries from storage and add to list
     if (localStorage.savedLists) {
 	var lists = JSON.parse(localStorage.savedLists)
@@ -512,10 +512,10 @@ async function queryData(formData) {
     }
     if (!error) {
 	// Store the query in the local storage and list of queries
-	saveToStore("queries", document.getElementById("query").value);
+	saveQueriesToStore("queries", document.getElementById("query").value);
 	let replacement = document.getElementById("replacement").value;
 	if (replacement != "")
-	    saveToStore("replacements", replacement);
+	    saveQueriesToStore("replacements", replacement);
 	// Remove unused data before sending it
 	formData.delete("checkedTreebank1");
 	formData.delete("checkedTreebank2");
