@@ -126,12 +126,12 @@ Results obtained on parallel treebanks can be saved as two separate files, one p
 
 ### Validation
 STUnD performs some basic (i.e. __less strict than the [official UD validator](github.com/UniversalDependencies/tools/blob/master/validate.py)__) validation of the input data, checking that all word lines contain 10 tab-separated fields, as well as that all token IDs, UPOS tags and DEPRELs are valid as per the [UD universal annotation guidelines](https://universaldependencies.org/guidelines.html).
-If the treebank contains one or more format errors, these are listed in the user interface:
+If your treebank contains one or more format errors, these are listed in the user interface:
 
 ![format errors](img/format_error.png)
 
 ### Diff mode
-Diff mode, activated by checking the "diff" box, helps users identify discrepancies between two similar treebanks. 
+Diff mode, activated by checking the "diff" box, helps you identify discrepancies between two similar treebanks. 
 This feature can be useful when exploring parallel (error-correction) learner treebanks, as well as when comparing alternative analyses of the same text, as in the following example:
 
 ![format errors](img/diff_tree.png)
