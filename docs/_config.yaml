@@ -14,15 +14,14 @@ header_pages:
 show_excerpts: false
 
 remote_theme: "jekyll/minima@1e8a445"
+
 minima:
   skin: dark
   date_format: "%-d %B %Y"
   social_links:
     - { platform: github, user_url: https://github.com/harisont }
-    - { platform: stackoverflow, user_url: https://stackoverflow.com/users/7729724/harisont }
     - { platform: instagram, user_url: https://www.instagram.com/unottica/ }
     - { platform: youtube, user_url: https://www.youtube.com/c/ImparalHaskellemettilodaparte }
-    - { platform: rss, user_url: https://harisont.github.io/feed.xml}
 
 plugins:
   - jekyll-feed

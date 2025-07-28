@@ -3,13 +3,13 @@ title: Installation
 layout: base
 ---
 
-# Installation
+# Local installation
 
-To compile and run STUnD directly on your computer, you can use either [the Haskell Tool Stack](https://docs.haskellstack.org/en/stable/) or build and run it inside a [Docker](https://www.docker.com/) container.
+To compile and run STUnD on your computer, you can use either [the Haskell Tool Stack](https://docs.haskellstack.org/en/stable/) or build and run it inside a [Docker](https://www.docker.com/) container.
 
 In either case, start by downloading the [source code](https://github.com/harisont/STUnD).
 
-## Installation via Stack
+## Installing STUnD via Stack
 If you have Stack, run  
 
 ```
@@ -34,3 +34,8 @@ docker compose up stund-gui
 ```
 
 This will take a while for the first time because the image has to be built. Afterwards, running the container can be started directly with the same command.
+
+---
+
+For troubleshooting Windows installations, see [here](win.md).
+For details about deployment at SBX, see [here](deployment.md).
