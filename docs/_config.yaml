@@ -13,8 +13,7 @@ header_pages:
 
 show_excerpts: false
 
-remote_theme: jekyll/minima
-
+remote_theme: "jekyll/minima@1e8a445"
 minima:
   skin: dark
   date_format: "%-d %B %Y"
