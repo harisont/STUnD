@@ -5,9 +5,9 @@
 */
 function pageLoad() {
     // Load saved queries from local storage
-    loadFromStore("queries");
+    loadQueriesFromStore("queries");
     // Load saved queries from local storage
-    loadFromStore("replacements");
+    loadQueriesFromStore("replacements");
 }
 
 /*
@@ -64,6 +64,16 @@ function resetAllErrors() {
 function resetTempFiles() {
     document.getElementById("t1file").value = null
     document.getElementById("t2file").value = null
+}
+
+/*
+  Called when a new file is selected in the input form
+*/
+function changedTreebankFileInput(treebank) {
+    document.getElementById('checkedTreebank' + treebank).value='false'
+    var formData = new FormData(document.getElementById("searchForm"))
+    window.treebank1file = formData.get('treebank1')
+    window.treebank2file = formData.get('treebank2')
 }
 
 /*
@@ -248,7 +258,7 @@ function handleFetchError(error) {
 /*
   Stores the query in the local storage
 */
-function saveToStore(category, value) {
+function saveQueriesToStore(category, value) {
     // Get queries from local storage
     var lists = JSON.parse(localStorage.savedLists);
     // Initialize new list if category is missing
@@ -270,7 +280,7 @@ function saveToStore(category, value) {
 /*
   Load stored lists from local storage
 */
-function loadFromStore(category) {
+function loadQueriesFromStore(category) {
     // Load queries from storage and add to list
     if (localStorage.savedLists) {
 	var lists = JSON.parse(localStorage.savedLists)
@@ -313,22 +323,24 @@ function resetEditable() {
 }
 
 async function sendFiles() {
-    var treebank1 = document.getElementById("treebank1");
+    var treebank1 = window.treebank1file //document.getElementById("treebank1");
     // Get edited flags
-    var isEdited = document.getElementById("editedTreebank1").value == "true" || document.getElementById("editedTreebank1").value == "true";
+    var isEdited = document.getElementById("editedTreebank1").value == "true" || document.getElementById("editedTreebank2").value == "true";
     if (isEdited) {
 	if (!window.confirm("The data has been modified. The changes will be discarded if you continue now. Are you sure?")) {
 	    // Cancel on user input
 	    return;
 	}
     }
-    var treebank2 = document.getElementById("l2treebank");
+    var treebank2 = window.treebank2file // document.getElementById("treebank2");
     // Also get the second treebank
-    if (treebank1.value.endsWith(".txt") || (treebank2 != null && treebank2.value.endsWith(".txt"))) {
+    if (treebank1.name.endsWith(".txt") || (treebank2.size != 0 && treebank2.name.endsWith(".txt"))) {
 	parseAndSendFiles();
     }
     else {
 	var formData = new FormData(document.getElementById("searchForm"));
+	formData.set('treebank1', window.treebank1file)
+	formData.set('treebank2', window.treebank2file)
 	queryData(formData);
 	resetEditable();
     }
@@ -399,9 +411,8 @@ async function parsePlaintext(treebank) {
   Parse plaintext files into treebanks before submitting thems
  */
 async function parseAndSendFiles() {
-    var formData = new FormData(document.getElementById("searchForm"));
-    var treebank1 = formData.get("treebank1");
-    var treebank2 = formData.get("treebank2");
+    var treebank1 = window.treebank1file;
+    var treebank2 = window.treebank2file;
     var formData = new FormData(document.getElementById("searchForm"));
     // Ask user before sending data to external service
     if (!window.confirm("Your data will be sent to an external service for processing. Is that okay?")) {
@@ -430,11 +441,14 @@ async function parseAndSendFiles() {
 	    emptyTreebank = true;
 	}
     }
+    window.treebank1file = formData.get("treebank1")
+    window.treebank2file = formData.get("treebank2")
     if (!emptyTreebank) {
 	queryData(formData);
     }
 }
 
+// Called from HTML form
 async function resendEditedData() {
     var formData = new FormData(document.getElementById("searchForm"));
     // Read the treebanks from the HTML table
@@ -457,6 +471,8 @@ async function resendEditedData() {
     var newFile2 = new File(newTreebank2,"editedTreebank2.conllu")
     formData.set("treebank1", newFile1)
     formData.set("treebank2", newFile2)
+    window.treebank1file = formData.get("treebank1")
+    window.treebank2file = formData.get("treebank2")
     queryData(formData);
     // Potentially replace previous files if they have been edited
     let container = new DataTransfer();
@@ -512,10 +528,10 @@ async function queryData(formData) {
     }
     if (!error) {
 	// Store the query in the local storage and list of queries
-	saveToStore("queries", document.getElementById("query").value);
+	saveQueriesToStore("queries", document.getElementById("query").value);
 	let replacement = document.getElementById("replacement").value;
 	if (replacement != "")
-	    saveToStore("replacements", replacement);
+	    saveQueriesToStore("replacements", replacement);
 	// Remove unused data before sending it
 	formData.delete("checkedTreebank1");
 	formData.delete("checkedTreebank2");

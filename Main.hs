@@ -16,6 +16,25 @@ import Data.List.Utils
 import Data.List
 import Data.Bifunctor
 import Text.PrettyPrint (render)
+import Data.Text.Lazy (Text)
+import qualified Data.Text.Lazy as T
+import Data.String.Conversions
+import qualified Data.Map as M
+import Data.Char
+import Data.Either
+import Web.Scotty
+import qualified Web.Scotty as S
+import Network.Wai.Middleware.RequestLogger
+import Network.Wai.Middleware.Static
+import Network.Wai.Parse (fileName,fileContent,defaultParseRequestBodyOptions)
+import Network.HTTP.Types.Status (mkStatus)
+import System.Directory
+import System.IO.Temp
+import Control.Monad
+
+import Data.Aeson (ToJSON)
+import GHC.Generics
+
 import RTree
 import UDStandard
 import UDTrees
@@ -28,25 +47,6 @@ import Align
 import Match hiding (matchingSubtrees)
 import Errors
 import Extract
-
-import Data.Text.Lazy (Text)
-import qualified Data.Text.Lazy as T
-import Data.String.Conversions
-import qualified Data.Map as M
-import qualified Data.List as L
-import Data.Char
-import Data.Either
-import Web.Scotty
-import qualified Web.Scotty as S
-import Network.Wai.Middleware.RequestLogger
-import Network.Wai.Middleware.Static
-import Network.Wai.Parse (fileName,fileContent,defaultParseRequestBodyOptions)
-import Network.HTTP.Types.Status (mkStatus)
-import System.Directory
-import System.IO.Temp
-
-import Data.Aeson (ToJSON)
-import GHC.Generics
 
 import Debug.Trace
 
@@ -97,11 +97,7 @@ tmpPath = "tmp"
 -- Debug flag and debug method in the ActionM monad
 debugOn = False
 debug :: String -> String -> ActionM ()
-debug msg var =
-  if debugOn then
-    liftIO $ putStrLn $ msg ++ "::\n" ++ var
-  else
-    return ()
+debug msg var = when debugOn $ liftIO $ putStrLn $ msg ++ "::\n" ++ var
 
 -- Handler for the landing page
 handleRoot :: ActionM ()
@@ -138,11 +134,13 @@ checkReplacement =
 checkConll :: ActionM ()
 checkConll =
   do
-    results <- map (prsUDText . T.unpack . decodeUtf8 . fileContent . snd) <$> files
+    results <- 
+      map (prsUDText . T.unpack . decodeUtf8 . fileContent . snd) <$> files
     if all isLeft results then
       json (Status "valid" "" (Just $ map show $ lefts results))
-    else
-      json (Status "invalid" "input is not in valid CoNLL-U format" $ Just $ concat $ rights results)
+    else json (Status 
+      "invalid" 
+      "input is not in valid CoNLL-U format" $ Just $ concat $ rights results)
 
 -- | A match is a pair that associates a sentence pair with a list of 
 -- alignments matching the query (could/should be moved to L2-UD; the match
@@ -228,7 +226,7 @@ searchTreebanks = do
                           then tree2sentence m1
                           else tree2sentence $ subtree2tree m1
                         m2' = tree2sentence $ subtree2tree m2
-                    in ((case mode of
+                    in (case mode of
                             TextMode -> highlin 
                                           (tree2sentence t1) 
                                           (tree2sentence m1) HTML
@@ -239,25 +237,33 @@ searchTreebanks = do
                                         (tree2sentence t2) 
                                         (tree2sentence m2) HTML
                            CoNNLUMode -> prt m2' ++ "\n"
-                           TreeMode -> sentence2svgFragment m2'))) 
+                           TreeMode -> sentence2svgFragment m2')) 
                 ms)
           matches
-  t1t2Tmpfile <- liftIO $ 
-                  writeMaybeTempFile t1t2file "t1-t2-.tsv" $ unlines $ map
+  t1t2Tmpfile <- 
+    liftIO $ writeMaybeTempFile t1t2file "t1-t2-.tsv" $ unlines $ map
       (\(t1,t2) -> t1 ++ "\t" ++ t2)
-      ((map (rmMarkup . mkUpper) t1Col) `zip` (map (rmMarkup . mkUpper) t2Col))
+      (zip 
+        (map (rmMarkup . mkUpper) t1Col)
+        (map (rmMarkup . mkUpper) t2Col))
   t1Tmpfile <- liftIO $ 
     (\(fname, fdata) -> writeMaybeTempFile t1File fname fdata) $ case mode of
       TextMode -> ("t1-.txt", rmMarkup $ mkUpper $ unlines t1Col)
       CoNNLUMode -> ("t1-.conllu", rmMarkup $ unlines t1Col)
-      TreeMode -> ("t1-.html", htmlStart ++ (rmMarkup $ unlines $ L.intersperse "\n<br>\n" t1Col) ++ htmlEnd)
+      TreeMode -> (
+        "t1-.html", htmlStart 
+                      ++ rmMarkup (unlines $ intersperse "\n<br>\n" t1Col) 
+                      ++ htmlEnd)
 
 
   t2Tmpfile <- liftIO $ 
     (\(fname, fdata) -> writeMaybeTempFile t1File fname fdata) $ case mode of
       TextMode -> ("t2-.txt", rmMarkup $ mkUpper $ unlines t2Col)
       CoNNLUMode -> ("t2-.conllu", rmMarkup $ unlines t2Col)
-      TreeMode -> ("t2-.html", htmlStart ++ (rmMarkup $ unlines $ L.intersperse "\n<br>\n" t2Col) ++ htmlEnd)
+      TreeMode -> (
+        "t2-.html", htmlStart 
+                      ++ rmMarkup (unlines $ intersperse "\n<br>\n" t2Col) 
+                      ++ htmlEnd)
 
   -- transform divergences into indices needed to highlight words in diff
   -- mode in the frontend
@@ -288,12 +294,12 @@ searchTreebanks = do
       rmMarkup s = replace "</b>" "" $ replace "<b>" "" s
       -- replace <b>text</b> markup by uppercase TEXT
       mkUpper s
-        | L.isPrefixOf "<b>" s = mkUpper' $ drop 3 s
+        | "<b>" `isPrefixOf` s = mkUpper' $ drop 3 s
         | null s = ""
         | otherwise = head s:mkUpper (tail s)
         where
           mkUpper' s
-            | L.isPrefixOf "</b>" s = mkUpper $ drop 4 s
+            | "</b>" `isPrefixOf` s = mkUpper $ drop 4 s
             | otherwise = toUpper (head s):mkUpper' (tail s)
       -- Writes the content either to a given file if it exists or to a new 
       -- temporary file otherwise
@@ -313,7 +319,7 @@ searchTreebanks = do
       maybeTmpFile (Just []) = Nothing
       -- Check if it is a file within the tmpPath
       maybeTmpFile (Just s)
-        | L.isPrefixOf tmpPath s = Just s
+        | tmpPath `isPrefixOf` s = Just s
         | otherwise = Nothing
 
 
@@ -322,13 +328,14 @@ downloadTmpFile :: ActionM ()
 downloadTmpFile =
   do
     fileName <- queryParam "filename"
-    if L.isPrefixOf tmpPath fileName then
+    if tmpPath `isPrefixOf` fileName then
       do
-        if L.isSuffixOf "html" fileName then
+        if "html" `isSuffixOf` fileName then
           setHeader "Content-Type" "text/html; charset=utf-8"
         else
           setHeader "Content-Type" "text/plain; charset=utf-8"
-        setHeader "Content-Disposition:" $ convertString $ "attachment; filename=\"" ++ fileName ++ "\""
+        setHeader "Content-Disposition:" $ convertString $ 
+          "attachment; filename=\"" ++ fileName ++ "\""
         file fileName 
     else
       S.status $ mkStatus 403 "Access denied"
@@ -339,10 +346,7 @@ main =
   do
     -- Cleanup old temporary directory if it exists
     tmpExists <- doesDirectoryExist tmpPath
-    if tmpExists then
-      removeDirectoryRecursive tmpPath
-    else
-      return ()
+    when tmpExists $ removeDirectoryRecursive tmpPath
     -- Create directory for temporary files
     createDirectory tmpPath
     -- Start the web server
@@ -352,6 +356,13 @@ main =
         middleware logStdoutDev
         -- Handles static files
         middleware static
+        get "/" handleRoot
+        get "/index.html" handleRoot
+        get "/check_query" checkQuery
+        get "/check_replacement" checkReplacement
+        post "/check_conll" checkConll
+        post "/search_treebanks" searchTreebanks
+        get "/tmp_file/" downloadTmpFile
         get "/" $ handleRoot
         get "/index.html" $ handleRoot
         get "/check_query" $ checkQuery
