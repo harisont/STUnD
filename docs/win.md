@@ -1,4 +1,4 @@
-# Compiling on Windows
+# Known issues (Windows)
 It appears that `curl`, __but not `curllib`__, is installed by default on Windows10+. Therefore it is necessary to:
 
 1. Download and extract `curl` binaries for windows(https://curl.se/windows/)

@@ -102,14 +102,17 @@ body {
 
 #modebar, .align-left {
     text-align: left;
+    width: 33%;
 }
 
 #optionbar {
     text-align: center;
+    width: 33%;
 }
 
 #buttonbar, .align-right {
     text-align: right;
+    width: 33%;
 }
 
 .numdiv {

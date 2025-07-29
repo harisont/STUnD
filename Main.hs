@@ -359,7 +359,14 @@ main =
         get "/" handleRoot
         get "/index.html" handleRoot
         get "/check_query" checkQuery
-        get "/check_repls" checkReplacement
+        get "/check_replacement" checkReplacement
         post "/check_conll" checkConll
         post "/search_treebanks" searchTreebanks
         get "/tmp_file/" downloadTmpFile
+        get "/" $ handleRoot
+        get "/index.html" $ handleRoot
+        get "/check_query" $ checkQuery
+        get "/check_replacement" $ checkReplacement
+        post "/check_conll" $ checkConll
+        post "/search_treebanks" $ searchTreebanks
+        get "/tmp_file/" $ downloadTmpFile
