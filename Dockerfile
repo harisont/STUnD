@@ -5,6 +5,7 @@ RUN apt-get update \
     libcurl4-gnutls-dev \
     libz-dev \
     haskell-stack \
+    xz-utils \
  && rm -rf /var/lib/apt/lists/*
 
 # Build app
