@@ -28,5 +28,8 @@ executable stund-gui
         http-types,
         aeson,
         deptreehs,
-        l2-ud
+        l2-ud,
+        unliftio,
+        bytestring,
+        resourcet
     default-language: Haskell2010

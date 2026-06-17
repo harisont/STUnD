@@ -50,6 +50,24 @@ import Extract
 
 import Debug.Trace
 
+import qualified Network.Wai.Parse as W
+import qualified Data.ByteString.Lazy.Char8 as BL
+import Control.Monad.Trans.Resource (withInternalState, runResourceT)
+import Web.Scotty.Internal.Types (formParamsAndFilesWith)
+import           Data.Traversable (for)
+-- | Copied from Web/Scotty/Action.hs in scotty and adjusted
+-- | Get list of uploaded files.
+--
+-- NB: Loads all file contents in memory with options 'W.defaultParseRequestBodyOptions'
+longFiles :: ActionM [File BL.ByteString]
+longFiles = runResourceT $ withInternalState $ \istate -> do
+  (_, fs) <- formParamsAndFilesWith istate (W.clearMaxRequestKeyLength W.defaultParseRequestBodyOptions)
+  for fs (\(fname, f) -> do
+                   bs <- liftIO $ BL.readFile (W.fileContent f)
+                   pure (fname, f{ W.fileContent = bs})
+                   )
+
+
 data Mode = TextMode | CoNNLUMode | TreeMode deriving (Eq, Read, Show, Enum)
 
 htmlStart =
@@ -135,7 +153,7 @@ checkConll :: ActionM ()
 checkConll =
   do
     results <- 
-      map (prsUDText . T.unpack . decodeUtf8 . fileContent . snd) <$> files
+      map (prsUDText . T.unpack . decodeUtf8 . fileContent . snd) <$> longFiles
     if all isLeft results then
       json (Status "valid" "" (Just $ map show $ lefts results))
     else json (Status 
@@ -177,7 +195,7 @@ stundReplace matches r = map (second (map (applyReplacement r))) matches
 -- Search the treebank(s) using the query and replacement parameters
 searchTreebanks :: ActionM ()
 searchTreebanks = do
-  formFiles <- M.fromList <$> files
+  formFiles <- M.fromList <$> longFiles
   let t1Text = decodeUtf8 $ fileContent $ formFiles M.! "treebank1"
   let t2Text = decodeUtf8 $ fileContent $ formFiles M.! "treebank2"
   let t1Sents = prsUDText $ T.unpack t1Text
